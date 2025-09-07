@@ -4,13 +4,14 @@ import { getRecentMemorizations, getOverallProgress, getDashboardChartData, getT
 import Icon from './Icon';
 import { TeacherProfile } from '../types';
 import EditTeacherProfileModal from './EditTeacherProfileModal';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface DashboardProps {
   onSelectStudent: (id: number) => void;
 }
 
-const GlassCard: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => (
-  <div className={`bg-dark-glass-bg backdrop-blur-xl border border-dark-glass-border rounded-2xl p-6 ${className}`}>
+const Card: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => (
+  <div className={`bg-card dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-6 shadow-sm ${className}`}>
     {children}
   </div>
 );
@@ -24,7 +25,7 @@ const CircularProgress: React.FC<{ progress: number, size?: number, strokeWidth?
     <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
       <svg className="absolute" width={size} height={size}>
         <circle
-          className="stroke-gray-700"
+          className="stroke-slate-200 dark:stroke-slate-700"
           fill="transparent"
           strokeWidth={strokeWidth}
           r={radius}
@@ -51,41 +52,34 @@ const CircularProgress: React.FC<{ progress: number, size?: number, strokeWidth?
           </linearGradient>
         </defs>
       </svg>
-      <span className="absolute text-2xl font-bold text-white">{progress}%</span>
+      <span className="absolute text-2xl font-bold text-slate-700 dark:text-slate-200">{progress}%</span>
     </div>
   );
 };
 
 
 const RecentMemorizationCard: React.FC<{ studentId: number, student: string, surah: string, progress: number, onSelectStudent: (id: number) => void }> = ({ studentId, student, surah, progress, onSelectStudent }) => {
-    // Delete functionality is a placeholder. In a real app this would call dataService.
-    const handleDelete = () => {
-        if (window.confirm(`Fungsi hapus belum diimplementasikan. Apakah Anda ingin melanjutkan?`)) {
-            console.log(`Deletion requested for ${student} - Surah: ${surah}`);
-        }
-    };
-    
     return (
-        <div className="bg-slate-800/50 p-4 rounded-lg flex items-center justify-between space-x-4 transition-all duration-300 ease-in-out hover:scale-[1.03] hover:bg-slate-700/75 hover:shadow-lg hover:shadow-brand-accent/10">
+        <div className="p-3 rounded-md hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors duration-200">
             <div className="flex-grow">
                 <div className="flex justify-between items-center mb-2">
-                    <button onClick={() => onSelectStudent(studentId)} className="font-semibold text-white hover:text-brand-accent transition-colors duration-200">
+                    <button onClick={() => onSelectStudent(studentId)} className="font-semibold text-slate-800 dark:text-slate-100 hover:text-brand-accent transition-colors duration-200">
                       {student}
                     </button>
-                    <span className="text-sm text-gray-400">{surah}</span>
+                    <span className="text-sm text-slate-500 dark:text-slate-400">{surah}</span>
                 </div>
-                <div className="w-full bg-gray-700 rounded-full h-2.5">
-                    <div className="bg-brand-accent h-2.5 rounded-full" style={{ width: `${progress}%` }}></div>
+                <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                    <div className="bg-brand-accent h-2 rounded-full" style={{ width: `${progress}%` }}></div>
                 </div>
-                <p className="text-right text-xs mt-1 text-gray-300">{progress}% Selesai</p>
+                <p className="text-right text-xs mt-1 text-slate-500 dark:text-slate-400">{progress}% Selesai</p>
             </div>
-            {/* Edit/Delete buttons can be added back if needed */}
         </div>
     );
 };
 
 
 const Dashboard: React.FC<DashboardProps> = ({ onSelectStudent }) => {
+  const { themeMode } = useTheme();
   const [recentMemorizations, setRecentMemorizations] = useState<any[]>([]);
   const [overallProgress, setOverallProgress] = useState(0);
   const [chartData, setChartData] = useState<any[]>([]);
@@ -106,29 +100,32 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectStudent }) => {
   };
 
   const defaultAvatar = (
-    <div className="w-16 h-16 rounded-full bg-dark-glass-bg border-2 border-dark-glass-border flex items-center justify-center">
-      <Icon name="profil" className="w-8 h-8 text-gray-400" />
+    <div className="w-16 h-16 rounded-full bg-slate-200 dark:bg-slate-700 border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center">
+      <Icon name="profil" className="w-8 h-8 text-slate-500 dark:text-slate-400" />
     </div>
   );
+
+  const gridColor = themeMode === 'light' ? '#e2e8f0' : '#334155';
+  const axisColor = themeMode === 'light' ? '#64748b' : '#94a3b8';
+  const tooltipStyle = {
+      backgroundColor: themeMode === 'light' ? '#ffffff' : '#1e293b',
+      border: `1px solid ${gridColor}`,
+      borderRadius: '0.75rem',
+      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'
+  };
+  const tooltipLabelStyle = { color: themeMode === 'light' ? '#334155' : '#e2e8f0' };
 
   return (
     <>
       <div className="space-y-8">
         <div className="flex justify-between items-start sm:items-center">
-          <div>
-              <h2 className="text-3xl font-bold text-white mb-2">Dashboard</h2>
-              <p className="text-gray-400">Selamat datang kembali, {teacherProfile?.name || 'Ustadz'}!</p>
-              <button 
-                onClick={() => setIsEditProfileModalOpen(true)}
-                className="text-sm mt-2 text-brand-accent hover:underline flex items-center gap-1.5 p-1 -ml-1"
-              >
-                <Icon name="edit" className="w-4 h-4" />
-                Ubah Profil Guru
-              </button>
-          </div>
-          <div className="relative group cursor-pointer" onClick={() => setIsEditProfileModalOpen(true)}>
+            <div className="border-b border-border dark:border-dark-border pb-5 flex-grow">
+              <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-50">Dashboard</h2>
+              <p className="text-slate-500 dark:text-slate-400 mt-1">Selamat datang kembali, {teacherProfile?.name || 'Ustadz'}!</p>
+            </div>
+          <div className="relative group cursor-pointer ml-6 flex-shrink-0" onClick={() => setIsEditProfileModalOpen(true)}>
               {teacherProfile?.profilePic ? (
-                  <img src={teacherProfile.profilePic} alt="Foto Profil" className="w-16 h-16 rounded-full object-cover border-2 border-brand-accent" />
+                  <img src={teacherProfile.profilePic} alt="Foto Profil" className="w-16 h-16 rounded-full object-cover border-2 border-brand-accent shadow" />
               ) : (
                   defaultAvatar
               )}
@@ -138,18 +135,18 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectStudent }) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <GlassCard className="lg:col-span-2">
-            <h3 className="text-xl font-semibold mb-4">Statistik Perkembangan Rata-rata Siswa</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="lg:col-span-2">
+            <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4">Statistik Perkembangan Rata-rata Siswa</h3>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={"rgba(255,255,255,0.1)"} />
-                  <XAxis dataKey="name" stroke={"rgba(255,255,255,0.7)"} />
-                  <YAxis stroke={"rgba(255,255,255,0.7)"} domain={[70, 100]} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+                  <XAxis dataKey="name" stroke={axisColor} />
+                  <YAxis stroke={axisColor} domain={[70, 100]} />
                   <Tooltip 
-                    contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '0.5rem' }}
-                    labelStyle={{color: '#d1d5db'}}
+                    contentStyle={tooltipStyle}
+                    labelStyle={tooltipLabelStyle}
                   />
                   <Legend />
                   <Line type="monotone" dataKey="tartiliScore" name="Rata-rata Tartili" stroke="hsl(var(--color-accent-h) var(--color-accent-s) var(--color-accent-l))" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 7 }} connectNulls />
@@ -158,22 +155,22 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectStudent }) => {
                 </LineChart>
               </ResponsiveContainer>
             </div>
-          </GlassCard>
+          </Card>
 
-          <GlassCard className="flex flex-col items-center justify-center">
-              <h3 className="text-xl font-semibold mb-4">Progress Target Hafalan</h3>
+          <Card className="flex flex-col items-center justify-center">
+              <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4">Progress Target Hafalan</h3>
               <CircularProgress progress={overallProgress} />
-          </GlassCard>
+          </Card>
         </div>
 
-        <GlassCard>
-          <h3 className="text-xl font-semibold mb-4">Hafalan Terbaru</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <Card>
+          <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">Hafalan Terbaru</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
               {recentMemorizations.length > 0 ? recentMemorizations.map((item, index) => (
                   <RecentMemorizationCard key={index} {...item} onSelectStudent={onSelectStudent} />
-              )) : <p className="text-gray-400 col-span-full text-center">Belum ada data hafalan terbaru.</p>}
+              )) : <p className="text-slate-500 dark:text-slate-400 col-span-full text-center py-4">Belum ada data hafalan terbaru.</p>}
           </div>
-        </GlassCard>
+        </Card>
       </div>
 
       <EditTeacherProfileModal 

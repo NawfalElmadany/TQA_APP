@@ -12,26 +12,26 @@ interface ProfilPageProps {
 
 const StudentCard: React.FC<{ student: Student & { profilePic: string | null }, onSelect: (id: number) => void, onEdit: (student: Student) => void, onDelete: (student: Student) => void }> = ({ student, onSelect, onEdit, onDelete }) => (
     <div 
-        className="bg-slate-800/50 p-4 rounded-lg flex items-center space-x-4 cursor-pointer transition-all duration-300 ease-in-out hover:border-brand-accent hover:scale-[1.02] hover:bg-slate-700/75 border border-transparent group relative"
+        className="bg-card dark:bg-dark-card p-4 rounded-lg flex items-center space-x-4 cursor-pointer transition-all duration-300 ease-in-out hover:border-brand-accent hover:shadow-md hover:-translate-y-1 border border-border dark:border-dark-border group relative"
     >
         <div onClick={() => onSelect(student.id)} className="flex items-center space-x-4 flex-grow">
             {student.profilePic ? (
                 <img src={student.profilePic} alt={student.name} className="w-10 h-10 rounded-full object-cover" />
             ) : (
-                <div className="w-10 h-10 bg-brand-accent rounded-full flex items-center justify-center font-bold text-lg text-white flex-shrink-0">
+                <div className="w-10 h-10 bg-brand-accent/20 dark:bg-brand-accent/30 text-brand-accent dark:text-brand-accent rounded-full flex items-center justify-center font-bold text-lg flex-shrink-0">
                     {student.name.charAt(0)}
                 </div>
             )}
             <div>
-                <h3 className="font-semibold text-md text-white">{student.name}</h3>
-                <p className="text-xs text-gray-400">Lihat Profile</p>
+                <h3 className="font-semibold text-md text-slate-800 dark:text-slate-100">{student.name}</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Lihat Profile</p>
             </div>
         </div>
         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <button onClick={(e) => { e.stopPropagation(); onEdit(student); }} className="p-2 text-gray-400 hover:text-white hover:bg-slate-700 rounded-full" aria-label={`Ubah ${student.name}`}>
+            <button onClick={(e) => { e.stopPropagation(); onEdit(student); }} className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full" aria-label={`Ubah ${student.name}`}>
                 <Icon name="edit" className="w-4 h-4" />
             </button>
-            <button onClick={(e) => { e.stopPropagation(); onDelete(student); }} className="p-2 text-red-500 hover:text-red-400 hover:bg-slate-700 rounded-full" aria-label={`Hapus ${student.name}`}>
+            <button onClick={(e) => { e.stopPropagation(); onDelete(student); }} className="p-2 text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-500 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-full" aria-label={`Hapus ${student.name}`}>
                 <Icon name="trash" className="w-4 h-4" />
             </button>
         </div>
@@ -116,11 +116,11 @@ const ProfilPage: React.FC<ProfilPageProps> = ({ onSelectStudent }) => {
   return (
     <>
       <div className="animate-fade-in space-y-8">
-        <div className="flex justify-between items-center">
-          <h2 className="text-3xl font-bold text-white">Siswa Al Irsyad</h2>
+        <div className="flex justify-between items-center pb-5 border-b border-border dark:border-dark-border">
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-50">Siswa Al Irsyad</h2>
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-2 bg-brand-accent text-white font-medium py-2 px-4 rounded-lg hover:bg-brand-accent-darker transition-all duration-300 shadow-lg hover:shadow-brand-accent/40"
+            className="flex items-center gap-2 bg-brand-accent text-white font-bold py-2 px-4 rounded-lg hover:bg-brand-accent-darker transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-brand-accent/30"
           >
             <Icon name="plus" className="w-5 h-5" />
             <span>Tambah Siswa</span>
@@ -131,17 +131,17 @@ const ProfilPage: React.FC<ProfilPageProps> = ({ onSelectStudent }) => {
           {Object.entries(studentsByClass).map(([className, students]) => {
             const isExpanded = expandedClass === className;
             return (
-              <div key={className} className="bg-dark-glass-bg backdrop-blur-xl border border-dark-glass-border rounded-2xl transition-all duration-300 overflow-hidden">
+              <div key={className} className="bg-card dark:bg-dark-card border border-border dark:border-dark-border rounded-xl transition-all duration-300 overflow-hidden shadow-sm">
                 <button
                   onClick={() => handleClassToggle(className)}
-                  className="w-full flex justify-between items-center p-5 text-left hover:bg-slate-800/40 transition-colors"
+                  className="w-full flex justify-between items-center p-5 text-left hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors"
                   aria-expanded={isExpanded}
                   aria-controls={`class-panel-${className}`}
                 >
-                  <h3 className="text-xl font-semibold text-white">{`Kelas ${className}`}</h3>
+                  <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100">{`Kelas ${className}`}</h3>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className={`h-6 w-6 text-gray-400 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
+                    className={`h-6 w-6 text-slate-500 dark:text-slate-400 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -156,7 +156,7 @@ const ProfilPage: React.FC<ProfilPageProps> = ({ onSelectStudent }) => {
                       id={`class-panel-${className}`}
                       className="p-5 pt-0 animate-fade-in"
                   >
-                    <div className="border-t border-dark-glass-border pt-5">
+                    <div className="border-t border-border dark:border-dark-border pt-5">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                           {students.map(student => (
                             <StudentCard 

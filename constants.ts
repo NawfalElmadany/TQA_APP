@@ -27,10 +27,29 @@ export const SURAHS: Surah[] = [
   { name: "Al-Fil", totalAyat: 5 }, { name: "Quraysh", totalAyat: 4 }, { name: "Al-Ma'un", totalAyat: 7 },
   { name: "Al-Kawthar", totalAyat: 3 }, { name: "Al-Kafirun", totalAyat: 6 }, { name: "An-Nasr", totalAyat: 3 },
   { name: "Al-Masad", totalAyat: 5 },
+  // Juz 29
   { name: "Al-Mulk", totalAyat: 30 }, { name: "Al-Qalam", totalAyat: 52 }, { name: "Al-Haqqah", totalAyat: 52 },
   { name: "Al-Ma'arij", totalAyat: 44 }, { name: "Nuh", totalAyat: 28 }, { name: "Al-Jinn", totalAyat: 28 },
   { name: "Al-Muzzammil", totalAyat: 20 }, { name: "Al-Muddaththir", totalAyat: 56 }, { name: "Al-Qiyamah", totalAyat: 40 },
-  { name: "Al-Insan", totalAyat: 31 }, { name: "Al-Mursalat", totalAyat: 50 }
+  { name: "Al-Insan", totalAyat: 31 }, { name: "Al-Mursalat", totalAyat: 50 },
+  // Juz 28
+  { name: "Al-Mujadila", totalAyat: 22 },
+  { name: "Al-Hashr", totalAyat: 24 },
+  { name: "Al-Mumtahanah", totalAyat: 13 },
+  { name: "As-Saff", totalAyat: 14 },
+  { name: "Al-Jumu'ah", totalAyat: 11 },
+  { name: "Al-Munafiqun", totalAyat: 11 },
+  { name: "At-Taghabun", totalAyat: 18 },
+  { name: "At-Talaq", totalAyat: 12 },
+  { name: "At-Tahrim", totalAyat: 12 },
+  // Juz 27
+  { name: "Adh-Dhariyat", totalAyat: 60 },
+  { name: "At-Tur", totalAyat: 49 },
+  { name: "An-Najm", totalAyat: 62 },
+  { name: "Al-Qamar", totalAyat: 55 },
+  { name: "Ar-Rahman", totalAyat: 78 },
+  { name: "Al-Waqi'ah", totalAyat: 96 },
+  { name: "Al-Hadid", totalAyat: 29 },
 ].map((s, i) => ({ ...s, id: i + 100 })); // Assign unique IDs
 
 export const TARTILI_LEVELS: string[] = [
@@ -40,6 +59,8 @@ export const TARTILI_LEVELS: string[] = [
   "Tartili 4",
   "Tartili 5",
   "Tartili 6",
+  "Gharib",
+  "Al Baqarah",
 ];
 
 export const JUZ_30_SURAHS = [
@@ -63,4 +84,26 @@ export const JUZ_29_SURAHS = [
     { name: "Al-Ma'arij", totalAyat: 44 }, { name: "Nuh", totalAyat: 28 }, { name: "Al-Jinn", totalAyat: 28 },
     { name: "Al-Muzzammil", totalAyat: 20 }, { name: "Al-Muddaththir", totalAyat: 56 }, { name: "Al-Qiyamah", totalAyat: 40 },
     { name: "Al-Insan", totalAyat: 31 }, { name: "Al-Mursalat", totalAyat: 50 }
+];
+
+export const JUZ_28_SURAHS = [
+    { name: "Al-Mujadila", totalAyat: 22 },
+    { name: "Al-Hashr", totalAyat: 24 },
+    { name: "Al-Mumtahanah", totalAyat: 13 },
+    { name: "As-Saff", totalAyat: 14 },
+    { name: "Al-Jumu'ah", totalAyat: 11 },
+    { name: "Al-Munafiqun", totalAyat: 11 },
+    { name: "At-Taghabun", totalAyat: 18 },
+    { name: "At-Talaq", totalAyat: 12 },
+    { name: "At-Tahrim", totalAyat: 12 }
+];
+
+export const JUZ_27_SURAHS = [
+    { name: "Adh-Dhariyat", totalAyat: 60 },
+    { name: "At-Tur", totalAyat: 49 },
+    { name: "An-Najm", totalAyat: 62 },
+    { name: "Al-Qamar", totalAyat: 55 },
+    { name: "Ar-Rahman", totalAyat: 78 },
+    { name: "Al-Waqi'ah", totalAyat: 96 },
+    { name: "Al-Hadid", totalAyat: 29 }
 ];

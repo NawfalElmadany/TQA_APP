@@ -321,31 +321,31 @@ const HafalanForm: React.FC = () => {
   if (lastSubmission) {
     return (
         <div className="animate-fade-in text-center">
-            <h3 className="text-2xl font-bold text-green-400 mb-4">
+            <h3 className="text-2xl font-bold text-green-600 dark:text-green-400 mb-4">
                 Data Berhasil Disimpan!
             </h3>
-            <div className="bg-slate-800/50 p-6 rounded-lg text-left space-y-3">
-                <div className="flex justify-between items-center"><span className="font-semibold text-gray-400">Tanggal:</span> <span className="font-medium text-white">{new Date(lastSubmission.date + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span></div>
-                <div className="flex justify-between items-center"><span className="font-semibold text-gray-400">Nama Siswa:</span> <span className="font-medium text-white">{lastSubmission.studentName}</span></div>
-                <div className="flex justify-between items-center"><span className="font-semibold text-gray-400">Surat:</span> <span className="font-medium text-white">{lastSubmission.surah}</span></div>
-                <div className="flex justify-between items-center"><span className="font-semibold text-gray-400">Ayat:</span> <span className="font-medium text-white">{lastSubmission.ayat}</span></div>
-                <div className="flex justify-between items-center"><span className="font-semibold text-gray-400">Nilai:</span> <span className="font-medium text-white">{lastSubmission.score}</span></div>
-                {lastSubmission.notes && <div className="pt-2 border-t border-dark-glass-border"><p className="font-semibold text-gray-400 mb-1">Catatan:</p><p className="text-gray-200 whitespace-pre-wrap">{lastSubmission.notes}</p></div>}
+            <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-lg text-left space-y-3 border border-border dark:border-dark-border">
+                <div className="flex justify-between items-center"><span className="font-semibold text-slate-500 dark:text-slate-400">Tanggal:</span> <span className="font-medium text-slate-800 dark:text-slate-200">{new Date(lastSubmission.date + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span></div>
+                <div className="flex justify-between items-center"><span className="font-semibold text-slate-500 dark:text-slate-400">Nama Siswa:</span> <span className="font-medium text-slate-800 dark:text-slate-200">{lastSubmission.studentName}</span></div>
+                <div className="flex justify-between items-center"><span className="font-semibold text-slate-500 dark:text-slate-400">Surat:</span> <span className="font-medium text-slate-800 dark:text-slate-200">{lastSubmission.surah}</span></div>
+                <div className="flex justify-between items-center"><span className="font-semibold text-slate-500 dark:text-slate-400">Ayat:</span> <span className="font-medium text-slate-800 dark:text-slate-200">{lastSubmission.ayat}</span></div>
+                <div className="flex justify-between items-center"><span className="font-semibold text-slate-500 dark:text-slate-400">Nilai:</span> <span className="font-medium text-slate-800 dark:text-slate-200">{lastSubmission.score}</span></div>
+                {lastSubmission.notes && <div className="pt-2 border-t border-border dark:border-dark-border"><p className="font-semibold text-slate-500 dark:text-slate-400 mb-1">Catatan:</p><p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{lastSubmission.notes}</p></div>}
             </div>
             {undoMessage ? (
-                <div className="mt-8 text-lg font-medium text-yellow-400 animate-fade-in">{undoMessage}</div>
+                <div className="mt-8 text-lg font-medium text-yellow-600 dark:text-yellow-400 animate-fade-in">{undoMessage}</div>
             ) : (
               <>
                 <Button onClick={handleInputLagi} className="mt-8">
                     Input Data Baru
                 </Button>
-                <div className="mt-4 text-sm text-gray-400">
+                <div className="mt-4 text-sm text-slate-500 dark:text-slate-400">
                     Salah input?
                     <button onClick={handleCorrectData} className="text-brand-accent hover:underline font-medium ml-2 px-2 py-1 transition-colors">
                         Koreksi Data
                     </button>
                     atau
-                    <button onClick={handleDeleteData} className="text-red-400 hover:underline font-medium ml-1 px-2 py-1 transition-colors">
+                    <button onClick={handleDeleteData} className="text-red-500 dark:text-red-400 hover:underline font-medium ml-1 px-2 py-1 transition-colors">
                         Hapus Data
                     </button>
                 </div>
@@ -422,10 +422,10 @@ const HafalanForm: React.FC = () => {
                 <button
                     type="button"
                     onClick={toggleListening}
-                    className={`flex items-center justify-center gap-2 w-full font-bold py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-dark-end transition-all duration-300 disabled:opacity-75 disabled:cursor-not-allowed ${
+                    className={`flex items-center justify-center gap-2 w-full font-bold py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background dark:focus:ring-offset-dark-card transition-all duration-300 disabled:opacity-75 disabled:cursor-not-allowed ${
                     isListening
                         ? 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500'
-                        : 'bg-transparent border border-brand-accent text-brand-accent hover:bg-brand-accent/20'
+                        : 'bg-transparent border border-brand-accent text-brand-accent hover:bg-brand-accent/10'
                     }`}
                 >
                     <Icon name="microphone" className={`w-5 h-5 ${isListening ? 'animate-pulse' : ''}`} />

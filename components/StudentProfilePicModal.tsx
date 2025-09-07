@@ -84,20 +84,20 @@ const StudentProfilePicModal: React.FC<StudentProfilePicModalProps> = ({ isOpen,
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 animate-fade-in"
+      className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="bg-dark-glass-bg backdrop-blur-xl border border-dark-glass-border rounded-2xl p-8 w-full max-w-md mx-4 text-white"
+        className="bg-card dark:bg-dark-card rounded-xl p-8 w-full max-w-md mx-4 text-slate-800 dark:text-slate-200 shadow-lg border border-border dark:border-dark-border"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-white">Ambil Foto Profil</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors text-3xl font-light" aria-label="Tutup modal">&times;</button>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Ambil Foto Profil</h2>
+          <button onClick={onClose} className="text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors text-3xl font-light" aria-label="Tutup modal">&times;</button>
         </div>
 
-        <div className="aspect-square bg-slate-900 rounded-lg overflow-hidden flex items-center justify-center mb-6">
-          {error && <p className="text-center text-red-400 p-4">{error}</p>}
+        <div className="aspect-square bg-slate-200 dark:bg-slate-700 rounded-lg overflow-hidden flex items-center justify-center mb-6 border border-border dark:border-dark-border">
+          {error && <p className="text-center text-red-600 dark:text-red-400 p-4">{error}</p>}
           
           <video
             ref={videoRef}
@@ -124,7 +124,7 @@ const StudentProfilePicModal: React.FC<StudentProfilePicModalProps> = ({ isOpen,
             <div className="grid grid-cols-2 gap-4">
               <button
                 onClick={handleRetake}
-                className="w-full bg-transparent border border-gray-600 text-gray-300 font-medium py-3 px-4 rounded-lg hover:bg-gray-700 hover:text-white transition-colors"
+                className="w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-medium py-3 px-4 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
               >
                 Ulangi
               </button>

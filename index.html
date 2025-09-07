@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TQA APP</title>
+    <title>TQA App</title>
     <style>
       :root {
         --color-accent-h: 217;
@@ -13,83 +13,44 @@
         --color-accent-darker-l: 54%;
       }
       select option {
-        background: #020c1b;
-        color: #e5e7eb;
+        background: #ffffff;
+        color: #1e293b;
+      }
+      .dark select option {
+        background: #0f172a;
+        color: #e2e8f0;
       }
     </style>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-      .background-blurs {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 0;
-        overflow: hidden;
-        pointer-events: none;
-      }
-      .blur-circle-1 {
-        position: absolute;
-        width: 70vw;
-        height: 70vw;
-        max-width: 800px;
-        max-height: 800px;
-        background: radial-gradient(circle, hsl(var(--color-accent-h) var(--color-accent-s) var(--color-accent-l) / 0.2), transparent 70%);
-        border-radius: 50%;
-        filter: blur(150px);
-        top: -20%;
-        left: -20%;
-        animation: move-circle-1 20s infinite alternate ease-in-out;
-      }
-      .blur-circle-2 {
-        position: absolute;
-        width: 50vw;
-        height: 50vw;
-        max-width: 700px;
-        max-height: 700px;
-        background: radial-gradient(circle, rgba(168, 85, 247, 0.15), transparent 70%);
-        border-radius: 50%;
-        filter: blur(120px);
-        bottom: -20%;
-        right: -20%;
-        animation: move-circle-2 25s infinite alternate ease-in-out;
-      }
-      @keyframes move-circle-1 {
-        from {
-          transform: translate(-20%, -20%) rotate(0deg);
-        }
-        to {
-          transform: translate(20%, 20%) rotate(360deg);
-        }
-      }
-      @keyframes move-circle-2 {
-        from {
-          transform: translate(15%, 10%) rotate(0deg);
-        }
-        to {
-          transform: translate(-15%, -10%) rotate(360deg);
-        }
-      }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
+        darkMode: 'class',
         theme: {
           extend: {
             fontFamily: {
-              sans: ['Poppins', 'sans-serif'],
+              sans: ['Inter', 'sans-serif'],
             },
             colors: {
               'brand-red': '#D62828',
-              'dark-start': '#0a192f',
-              'dark-end': '#020c1b',
               'brand-accent': 'hsl(var(--color-accent-h) var(--color-accent-s) var(--color-accent-l) / <alpha-value>)',
               'brand-accent-darker': 'hsl(var(--color-accent-h) var(--color-accent-s) var(--color-accent-darker-l) / <alpha-value>)',
-              'dark-glass-bg': 'rgba(28, 41, 89, 0.1)',
-              'dark-glass-border': 'rgba(168, 185, 255, 0.1)',
+              // New Professional/SaaS Palette
+              'background': '#f8fafc',
+              'dark-background': '#0f172a',
+              'card': '#ffffff',
+              'dark-card': '#1e293b',
+              'border': '#e2e8f0',
+              'dark-border': '#334155',
+              'input': '#f1f5f9',
+              'dark-input': '#334155',
+            },
+            boxShadow: {
+                'DEFAULT': '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+                'md': '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+                'lg': '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
             },
             keyframes: {
               fadeIn: {
@@ -121,12 +82,8 @@
 }
 </script>
 </head>
-  <body class="bg-gradient-to-br from-dark-start to-dark-end">
-    <div class="background-blurs">
-      <div class="blur-circle-1"></div>
-      <div class="blur-circle-2"></div>
-    </div>
-    <div id="root" style="position: relative; z-index: 1;"></div>
+  <body class="bg-background dark:bg-dark-background text-slate-800 dark:text-slate-200">
+    <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>
 </html>

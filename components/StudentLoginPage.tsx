@@ -39,11 +39,11 @@ const StudentLoginPage: React.FC<StudentLoginPageProps> = ({ onLogin, onBack }) 
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 font-sans text-white">
+    <div className="min-h-screen flex items-center justify-center p-4 font-sans">
       <div className="w-full max-w-md animate-fade-in relative">
          <button
             onClick={onBack}
-            className="absolute -top-16 left-0 md:top-4 md:left-4 bg-dark-glass-bg border border-dark-glass-border text-gray-300 p-2.5 rounded-lg hover:bg-slate-700 hover:text-white transition-colors duration-200"
+            className="absolute -top-16 left-0 md:top-4 md:left-4 bg-card dark:bg-dark-card border border-border dark:border-dark-border text-slate-600 dark:text-slate-300 p-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/60 hover:text-slate-800 dark:hover:text-white transition-colors duration-200"
             aria-label="Kembali"
         >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -53,11 +53,11 @@ const StudentLoginPage: React.FC<StudentLoginPageProps> = ({ onLogin, onBack }) 
 
         <div className="text-center mb-8">
             <Logo className="w-18 h-18 sm:w-24 sm:h-24 md:w-32 md:h-32 mx-auto mb-6 transition-transform duration-500 ease-in-out hover:scale-110 hover:rotate-3" />
-            <h1 className="text-3xl font-bold text-white tracking-tight">Login Siswa</h1>
-            <p className="text-gray-300 mt-1 font-medium">Lihat Progres Hafalanmu</p>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Login Siswa</h1>
+            <p className="text-slate-600 dark:text-gray-300 mt-1 font-medium">Lihat Progres Hafalanmu</p>
         </div>
 
-        <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-8 shadow-2xl">
+        <div className="bg-card dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-8 shadow-lg">
           <form onSubmit={handleSubmit} noValidate>
             <div className="space-y-6">
                 <FormGroup label="Pilih Kelas Kamu">

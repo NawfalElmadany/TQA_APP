@@ -362,34 +362,34 @@ const TartiliForm: React.FC = () => {
   if (lastSubmission) {
     return (
         <div className="animate-fade-in text-center">
-            <h3 className="text-2xl font-bold text-green-400 mb-4">
+            <h3 className="text-2xl font-bold text-green-600 dark:text-green-400 mb-4">
                 {lastSubmission.lulus ? `Kelulusan Berhasil Dicatat!` : `Data Berhasil Disimpan!`}
             </h3>
-            <div className="bg-slate-800/50 p-6 rounded-lg text-left space-y-3">
-                <div className="flex justify-between items-center"><span className="font-semibold text-gray-400">Tanggal:</span> <span className="font-medium text-white">{new Date(lastSubmission.date + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span></div>
-                <div className="flex justify-between items-center"><span className="font-semibold text-gray-400">Nama Siswa:</span> <span className="font-medium text-white">{lastSubmission.studentName}</span></div>
-                <div className="flex justify-between items-center"><span className="font-semibold text-gray-400">Level Tartili:</span> <span className="font-medium text-white">{lastSubmission.level}</span></div>
+            <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-lg text-left space-y-3 border border-border dark:border-dark-border">
+                <div className="flex justify-between items-center"><span className="font-semibold text-slate-500 dark:text-slate-400">Tanggal:</span> <span className="font-medium text-slate-800 dark:text-slate-200">{new Date(lastSubmission.date + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span></div>
+                <div className="flex justify-between items-center"><span className="font-semibold text-slate-500 dark:text-slate-400">Nama Siswa:</span> <span className="font-medium text-slate-800 dark:text-slate-200">{lastSubmission.studentName}</span></div>
+                <div className="flex justify-between items-center"><span className="font-semibold text-slate-500 dark:text-slate-400">Level Tartili:</span> <span className="font-medium text-slate-800 dark:text-slate-200">{lastSubmission.level}</span></div>
                 {lastSubmission.page !== undefined && !lastSubmission.lulus && (
-                    <div className="flex justify-between items-center"><span className="font-semibold text-gray-400">Halaman:</span> <span className="font-medium text-white">{lastSubmission.page}</span></div>
+                    <div className="flex justify-between items-center"><span className="font-semibold text-slate-500 dark:text-slate-400">Halaman:</span> <span className="font-medium text-slate-800 dark:text-slate-200">{lastSubmission.page}</span></div>
                 )}
-                 <div className="flex justify-between items-center"><span className="font-semibold text-gray-400">{lastSubmission.lulus ? `Nilai Drill:` : `Nilai:`}</span> <span className="font-medium text-white">{lastSubmission.score}</span></div>
-                {lastSubmission.notes && <div className="pt-2 border-t border-dark-glass-border"><p className="font-semibold text-gray-400 mb-1">Catatan:</p><p className="text-gray-200 whitespace-pre-wrap">{lastSubmission.notes}</p></div>}
+                 <div className="flex justify-between items-center"><span className="font-semibold text-slate-500 dark:text-slate-400">{lastSubmission.lulus ? `Nilai Drill:` : `Nilai:`}</span> <span className="font-medium text-slate-800 dark:text-slate-200">{lastSubmission.score}</span></div>
+                {lastSubmission.notes && <div className="pt-2 border-t border-border dark:border-dark-border"><p className="font-semibold text-slate-500 dark:text-slate-400 mb-1">Catatan:</p><p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{lastSubmission.notes}</p></div>}
             </div>
             
             {undoMessage ? (
-                <div className="mt-8 text-lg font-medium text-yellow-400 animate-fade-in">{undoMessage}</div>
+                <div className="mt-8 text-lg font-medium text-yellow-600 dark:text-yellow-400 animate-fade-in">{undoMessage}</div>
             ) : (
               <>
                 <Button onClick={handleInputLagi} className="mt-8">
                     Input Data Baru
                 </Button>
-                <div className="mt-4 text-sm text-gray-400">
+                <div className="mt-4 text-sm text-slate-500 dark:text-slate-400">
                     Salah input?
                     <button onClick={handleCorrectData} className="text-brand-accent hover:underline font-medium ml-2 px-2 py-1 transition-colors">
                         Koreksi Data
                     </button>
                     atau
-                    <button onClick={handleDeleteData} className="text-red-400 hover:underline font-medium ml-1 px-2 py-1 transition-colors">
+                    <button onClick={handleDeleteData} className="text-red-500 dark:text-red-400 hover:underline font-medium ml-1 px-2 py-1 transition-colors">
                         Hapus Data
                     </button>
                 </div>
@@ -402,35 +402,32 @@ const TartiliForm: React.FC = () => {
   return (
     <form onSubmit={handleSubmit} ref={formRef}>
       <style>{`
-          .toggle-checkbox {
-              -webkit-appearance: none;
-              appearance: none;
-              transition: right .2s ease-in-out, background-color .2s ease-in-out;
-              right: 1rem; /* unchecked position */
-          }
-          .toggle-checkbox:checked {
-              right: 0.1rem; /* checked position */
-              border-color: hsl(var(--color-accent-h), var(--color-accent-s), var(--color-accent-l));
-          }
           .toggle-checkbox:checked + .toggle-label {
               background-color: hsl(var(--color-accent-h), var(--color-accent-s), var(--color-accent-l));
+          }
+          .toggle-checkbox:checked {
+            transform: translateX(1rem);
+            border-color: hsl(var(--color-accent-h), var(--color-accent-s), var(--color-accent-l));
+          }
+          .toggle-checkbox {
+            transition: transform .2s ease-in-out;
           }
           .toggle-label {
               transition: background-color .2s ease-in-out;
           }
       `}</style>
       <div className="flex items-center justify-end mb-4">
-          <label htmlFor="drill-toggle" className="mr-3 text-sm font-medium text-gray-300">Mode Drill</label>
-          <div className="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
+          <label htmlFor="drill-toggle" className="mr-3 text-sm font-medium text-slate-600 dark:text-slate-300">Mode Drill/Ujian</label>
+          <div className="relative inline-block w-10 align-middle select-none">
               <input 
                   type="checkbox" 
                   name="drill-toggle" 
                   id="drill-toggle" 
                   checked={isDrillMode}
                   onChange={() => setIsDrillMode(!isDrillMode)}
-                  className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
+                  className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-2 appearance-none cursor-pointer border-slate-300 dark:border-slate-500 dark:bg-slate-800"
               />
-              <label htmlFor="drill-toggle" className="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer"></label>
+              <label htmlFor="drill-toggle" className="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 dark:bg-slate-700 cursor-pointer"></label>
           </div>
       </div>
 
@@ -498,10 +495,10 @@ const TartiliForm: React.FC = () => {
             <button
               type="button"
               onClick={toggleListening}
-              className={`flex items-center justify-center gap-2 w-full font-bold py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-dark-end transition-all duration-300 disabled:opacity-75 disabled:cursor-not-allowed ${
+              className={`flex items-center justify-center gap-2 w-full font-bold py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background dark:focus:ring-offset-dark-card transition-all duration-300 disabled:opacity-75 disabled:cursor-not-allowed ${
                 isListening
                   ? 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500'
-                  : 'bg-transparent border border-brand-accent text-brand-accent hover:bg-brand-accent/20'
+                  : 'bg-transparent border border-brand-accent text-brand-accent hover:bg-brand-accent/10'
               }`}
             >
               <Icon name="microphone" className={`w-5 h-5 ${isListening ? 'animate-pulse' : ''}`} />

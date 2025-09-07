@@ -10,16 +10,16 @@ const InputDataForm: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('tartili');
 
   const getTabClassName = (tabName: ActiveTab) => {
-    const baseClasses = 'px-5 py-2.5 w-full text-sm font-medium leading-5 rounded-lg focus:outline-none focus:ring-2 ring-offset-2 ring-offset-slate-800/60 ring-brand-accent transition-colors duration-200';
+    const baseClasses = 'px-5 py-2.5 w-full text-sm font-medium leading-5 rounded-md focus:outline-none focus:ring-2 ring-offset-2 ring-offset-card dark:ring-offset-dark-card ring-brand-accent transition-colors duration-200';
     if (activeTab === tabName) {
-      return `${baseClasses} bg-brand-accent text-white shadow-md`;
+      return `${baseClasses} bg-brand-accent text-white shadow`;
     }
-    return `${baseClasses} text-gray-300 hover:bg-white/10 hover:text-white`;
+    return `${baseClasses} text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-700/60 hover:text-slate-800 dark:hover:text-slate-100`;
   };
 
   return (
     <FormCard title="Input Data Perkembangan">
-      <div className="mb-8 flex justify-center space-x-2 p-1 bg-slate-800/60 rounded-lg">
+      <div className="mb-8 flex justify-center space-x-2 p-1 bg-slate-100 dark:bg-slate-800/50 rounded-lg">
         <button className={getTabClassName('tartili')} onClick={() => setActiveTab('tartili')}>
           Catatan Tartili
         </button>

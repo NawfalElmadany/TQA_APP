@@ -5,8 +5,8 @@ import { FormGroup, Input, TextArea, Button, SuccessMessage } from './FormCard';
 import Icon from './Icon';
 import DeleteNoteConfirmationModal from './DeleteNoteConfirmationModal';
 
-const GlassCard: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => (
-  <div className={`bg-dark-glass-bg backdrop-blur-xl border border-dark-glass-border rounded-2xl p-6 ${className}`}>
+const Card: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => (
+  <div className={`bg-card dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-6 shadow-sm ${className}`}>
     {children}
   </div>
 );
@@ -89,14 +89,14 @@ const DailyNotesPage: React.FC = () => {
     return (
         <>
             <div className="space-y-8 animate-fade-in">
-                <div>
-                    <h2 className="text-3xl font-bold text-white mb-2">Catatan Harian Guru</h2>
-                    <p className="text-gray-400">Tulis pengingat, refleksi, atau rencana harian Anda di sini.</p>
+                <div className="border-b border-border dark:border-dark-border pb-5">
+                    <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-50 mb-1">Catatan Harian Guru</h2>
+                    <p className="text-slate-500 dark:text-slate-400">Tulis pengingat, refleksi, atau rencana harian Anda di sini.</p>
                 </div>
                 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Editor Column */}
-                    <GlassCard className="lg:col-span-2">
+                    <Card className="lg:col-span-2">
                         <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
                             <FormGroup label="Pilih Tanggal">
                                 <Input 
@@ -125,42 +125,42 @@ const DailyNotesPage: React.FC = () => {
                                 {feedbackMessage && <SuccessMessage>{feedbackMessage.text}</SuccessMessage>}
                             </div>
                         </form>
-                    </GlassCard>
+                    </Card>
 
                     {/* Side Column */}
                     <div className="space-y-6">
                         <button
                             onClick={handleAddNewNote}
-                            className="w-full flex items-center justify-center gap-2 bg-brand-accent text-white font-medium py-3 px-4 rounded-lg hover:bg-brand-accent-darker transition-all duration-300 shadow-lg hover:shadow-brand-accent/40"
+                            className="w-full flex items-center justify-center gap-2 bg-brand-accent text-white font-bold py-3 px-4 rounded-lg hover:bg-brand-accent-darker transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-brand-accent/30"
                         >
                             <Icon name="plus" className="w-5 h-5" />
                             <span>Buat Catatan Hari Ini</span>
                         </button>
                         
-                        <GlassCard className="w-full">
-                            <h3 className="text-xl font-semibold mb-4 text-white">Catatan Tersimpan</h3>
+                        <Card className="w-full">
+                            <h3 className="text-xl font-semibold mb-4 text-slate-900 dark:text-slate-100">Catatan Tersimpan</h3>
                             <div className="space-y-3 max-h-[28rem] overflow-y-auto pr-2">
                                 {notes.length > 0 ? notes.map(note => (
                                     <div 
                                         key={note.date}
-                                        className={`bg-slate-800/50 p-3 rounded-lg group transition-all duration-200 border-2 ${selectedDate === note.date ? 'border-brand-accent' : 'border-transparent'}`}
+                                        className={`bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg group transition-all duration-200 border-2 ${selectedDate === note.date ? 'border-brand-accent' : 'border-border dark:border-dark-border'}`}
                                     >
                                         <div className="flex justify-between items-start">
                                             <div>
-                                                <p className="font-semibold text-sm text-gray-200">{formatDate(note.date)}</p>
-                                                <p className="text-gray-400 text-sm mt-1 line-clamp-2">{note.content}</p>
+                                                <p className="font-semibold text-sm text-slate-700 dark:text-slate-200">{formatDate(note.date)}</p>
+                                                <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 line-clamp-2">{note.content}</p>
                                             </div>
                                             <div className="flex flex-col items-center space-y-1 ml-2 flex-shrink-0">
                                                 <button
                                                     onClick={() => handleSelectNote(note)}
-                                                    className="p-1.5 text-gray-400 hover:text-white hover:bg-slate-700 rounded-full transition-colors"
+                                                    className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full transition-colors"
                                                     aria-label="Lihat atau Ubah Catatan"
                                                 >
                                                     <Icon name="edit" className="w-4 h-4" />
                                                 </button>
                                                 <button
                                                     onClick={() => handleDelete(note.date)}
-                                                    className="p-1.5 text-red-500 hover:text-red-400 hover:bg-slate-700 rounded-full transition-colors"
+                                                    className="p-1.5 text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-500 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-full transition-colors"
                                                     aria-label="Hapus Catatan"
                                                 >
                                                     <Icon name="trash" className="w-4 h-4" />
@@ -169,10 +169,10 @@ const DailyNotesPage: React.FC = () => {
                                         </div>
                                     </div>
                                 )) : (
-                                    <p className="text-center text-gray-400 text-sm pt-4">Belum ada catatan yang disimpan.</p>
+                                    <p className="text-center text-slate-500 dark:text-slate-400 text-sm pt-4">Belum ada catatan yang disimpan.</p>
                                 )}
                             </div>
-                        </GlassCard>
+                        </Card>
                     </div>
                 </div>
             </div>

@@ -24,13 +24,14 @@ const NavItem: React.FC<{
   return (
     <li
       onClick={onClick}
-      className={`flex items-center space-x-4 p-3 rounded-lg cursor-pointer transition-all duration-300 ease-in-out ${
+      className={`flex items-center space-x-4 p-3 rounded-lg cursor-pointer transition-all duration-200 relative ${
         isActive
-          ? 'bg-brand-accent text-white shadow-lg scale-105'
-          : 'text-gray-300 hover:bg-brand-accent/20 hover:text-white transform hover:scale-[1.03] active:scale-100 active:bg-brand-accent/30'
+          ? 'bg-brand-accent/10 text-brand-accent font-semibold'
+          : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-slate-100'
       }`}
     >
-      <Icon name={iconName} />
+      {isActive && <span className="absolute left-0 top-2 bottom-2 w-1 bg-brand-accent rounded-r-full"></span>}
+      <Icon name={iconName} className="w-6 h-6" />
       <span className="font-medium">{page}</span>
       {badgeCount !== undefined && badgeCount > 0 && (
         <span className="ml-auto bg-brand-red text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center animate-fade-in">
@@ -56,11 +57,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, setActivePage, onLogout, 
 
   return (
     <>
-      <aside className="w-full md:w-64 bg-dark-glass-bg backdrop-blur-xl border-r border-dark-glass-border p-4 md:p-6 flex-shrink-0 flex flex-col justify-between">
+      <aside className="w-full md:w-64 bg-white dark:bg-dark-card border-r border-border dark:border-dark-border p-4 md:p-6 flex-shrink-0 flex flex-col justify-between">
         <div>
           <div className="flex items-center space-x-3 mb-10">
             <Logo className="w-10 h-10" />
-            <h1 className="text-xl font-bold text-white">TQA APP</h1>
+            <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">TQA App</h1>
           </div>
           <nav>
             <ul className="space-y-3">
@@ -85,7 +86,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, setActivePage, onLogout, 
         <div>
           <button
             onClick={() => setIsLogoutModalOpen(true)}
-            className="flex items-center space-x-4 p-3 rounded-lg cursor-pointer transition-all duration-200 ease-in-out w-full text-red-400 hover:bg-red-500/20 hover:text-red-300"
+            className="flex items-center space-x-4 p-3 rounded-lg cursor-pointer transition-all duration-200 ease-in-out w-full text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10"
             aria-label="Logout"
           >
             <Icon name="logout" className="w-6 h-6" />

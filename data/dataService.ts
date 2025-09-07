@@ -3,7 +3,6 @@ import { STUDENTS_INITIAL_NAMES, JUZ_29_SURAHS, JUZ_30_SURAHS, TARTILI_LEVELS } 
 
 const DB_KEY = 'al-irsyad-monitoring-data';
 const TEACHER_PROFILE_KEY = 'al-irsyad-teacher-profile';
-const LOGO_KEY = 'tqa-app-custom-logo';
 
 interface AppData {
   users: User[];
@@ -666,7 +665,6 @@ export const exportAllData = (): { success: boolean, message?: string, data?: st
   try {
     const mainDataString = localStorage.getItem(DB_KEY);
     const teacherProfileString = localStorage.getItem(TEACHER_PROFILE_KEY);
-    const logoString = localStorage.getItem(LOGO_KEY);
 
     if (!mainDataString) {
       return { success: false, message: 'Tidak ada data utama untuk diekspor.' };
@@ -675,7 +673,6 @@ export const exportAllData = (): { success: boolean, message?: string, data?: st
     const exportObject = {
       db: JSON.parse(mainDataString),
       profile: teacherProfileString ? JSON.parse(teacherProfileString) : getTeacherProfile(),
-      logo: logoString || null
     };
 
     const jsonString = JSON.stringify(exportObject, null, 2);
@@ -698,14 +695,8 @@ export const importAllData = (jsonString: string): { success: boolean, message: 
     localStorage.setItem(DB_KEY, JSON.stringify(data.db));
     localStorage.setItem(TEACHER_PROFILE_KEY, JSON.stringify(data.profile));
     
-    if (data.logo) {
-      localStorage.setItem(LOGO_KEY, data.logo);
-    } else {
-      localStorage.removeItem(LOGO_KEY);
-    }
-    
-    // Dispatch event to notify components of the logo change
-    window.dispatchEvent(new CustomEvent('logo-updated'));
+    // Clean up old logo data if it exists
+    localStorage.removeItem('tqa-app-custom-logo');
 
     return { success: true, message: 'Data berhasil diimpor! Aplikasi akan dimuat ulang.' };
   } catch (error) {
@@ -713,17 +704,4 @@ export const importAllData = (jsonString: string): { success: boolean, message: 
     const errorMessage = error instanceof Error ? error.message : 'File JSON tidak valid atau rusak.';
     return { success: false, message: `Gagal mengimpor data: ${errorMessage}` };
   }
-};
-
-// --- LOGO MANAGEMENT ---
-export const saveLogo = (base64String: string): void => {
-    localStorage.setItem(LOGO_KEY, base64String);
-};
-
-export const getLogo = (): string | null => {
-    return localStorage.getItem(LOGO_KEY);
-};
-
-export const resetLogo = (): void => {
-    localStorage.removeItem(LOGO_KEY);
 };

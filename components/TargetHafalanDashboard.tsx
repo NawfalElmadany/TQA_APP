@@ -6,16 +6,16 @@ interface TargetHafalanDashboardProps {
   onSelectStudent: (id: number) => void;
 }
 
-const GlassCard: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => (
-  <div className={`bg-dark-glass-bg backdrop-blur-xl border border-dark-glass-border rounded-2xl p-6 ${className}`}>
+const Card: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => (
+  <div className={`bg-card dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-6 shadow-sm ${className}`}>
     {children}
   </div>
 );
 
 const StatCard: React.FC<{ title: string; value: string | number; }> = ({ title, value }) => (
-    <div className="text-center bg-slate-800/50 p-4 rounded-lg">
-        <p className="text-gray-400 text-sm">{title}</p>
-        <p className="text-2xl font-bold text-white mt-1">{value}</p>
+    <div className="text-center bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg border border-border dark:border-dark-border">
+        <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">{title}</p>
+        <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">{value}</p>
     </div>
 );
 
@@ -28,7 +28,7 @@ const CircularProgress: React.FC<{ progress: number, size?: number, strokeWidth?
     <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
       <svg className="absolute" width={size} height={size}>
         <circle
-          className="stroke-gray-700"
+          className="stroke-slate-200 dark:stroke-slate-700"
           fill="transparent"
           strokeWidth={strokeWidth}
           r={radius}
@@ -55,7 +55,7 @@ const CircularProgress: React.FC<{ progress: number, size?: number, strokeWidth?
           </linearGradient>
         </defs>
       </svg>
-      <span className="absolute text-2xl font-bold text-white">{progress.toFixed(1)}%</span>
+      <span className="absolute text-2xl font-bold text-slate-700 dark:text-slate-200">{progress.toFixed(1)}%</span>
     </div>
   );
 };
@@ -88,32 +88,32 @@ const TargetHafalanDashboard: React.FC<TargetHafalanDashboardProps> = ({ onSelec
 
     return (
         <div className="space-y-8 animate-fade-in">
-            <div>
-                <h2 className="text-3xl font-bold text-white mb-2">Target Hafalan Juz 29 & 30</h2>
-                <p className="text-gray-400">Pantau progres hafalan seluruh siswa secara terpusat.</p>
+            <div className="border-b border-border dark:border-dark-border pb-5">
+                <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-50 mb-1">Target Hafalan Juz 29 & 30</h2>
+                <p className="text-slate-500 dark:text-slate-400">Pantau progres hafalan seluruh siswa secara terpusat.</p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <GlassCard className="flex flex-col items-center justify-center space-y-4">
-                    <h3 className="text-xl font-semibold">Progres Keseluruhan</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <Card className="flex flex-col items-center justify-center space-y-4">
+                    <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Progres Keseluruhan</h3>
                     <CircularProgress progress={overallProgress} size={150} strokeWidth={12} />
-                </GlassCard>
-                <GlassCard className="lg:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-4 content-center">
+                </Card>
+                <Card className="lg:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-4 content-center">
                     <StatCard title="Total Surat Target" value={totalTargetSurahs} />
                     <StatCard title="Total Siswa" value={studentProfiles.length} />
                     <StatCard title="Total Ayat Target" value={overallTotalAyat.toLocaleString()} />
-                </GlassCard>
+                </Card>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <GlassCard className="lg:col-span-1">
-                     <h3 className="text-xl font-semibold mb-4 text-white">Papan Peringkat</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <Card className="lg:col-span-1">
+                     <h3 className="text-xl font-semibold mb-4 text-slate-900 dark:text-slate-100">Papan Peringkat</h3>
                      <div className="space-y-3">
                         {studentProgressData.slice(0, 5).map((student, index) => (
-                             <div key={student.id} className="bg-slate-800/50 p-3 rounded-lg flex items-center justify-between">
+                             <div key={student.id} className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg flex items-center justify-between border border-border dark:border-dark-border">
                                 <div className="flex items-center space-x-3">
-                                    <span className={`w-8 h-8 flex items-center justify-center rounded-full font-bold ${index < 3 ? 'bg-brand-accent/80 text-white' : 'bg-slate-700'}`}>{index + 1}</span>
-                                    <button onClick={() => onSelectStudent(student.id)} className="font-medium hover:text-brand-accent transition-colors">
+                                    <span className={`w-8 h-8 flex items-center justify-center rounded-full font-bold ${index < 3 ? 'bg-brand-accent/80 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}`}>{index + 1}</span>
+                                    <button onClick={() => onSelectStudent(student.id)} className="font-medium text-slate-700 dark:text-slate-200 hover:text-brand-accent transition-colors">
                                         {student.name}
                                     </button>
                                 </div>
@@ -121,40 +121,40 @@ const TargetHafalanDashboard: React.FC<TargetHafalanDashboardProps> = ({ onSelec
                             </div>
                         ))}
                      </div>
-                </GlassCard>
+                </Card>
 
-                <GlassCard className="lg:col-span-2">
-                    <h3 className="text-xl font-semibold mb-4 text-white">Progres Semua Siswa</h3>
+                <Card className="lg:col-span-2">
+                    <h3 className="text-xl font-semibold mb-4 text-slate-900 dark:text-slate-100">Progres Semua Siswa</h3>
                     <div className="overflow-x-auto max-h-96">
                         <table className="w-full text-left">
-                            <thead>
-                                <tr className="border-b border-dark-glass-border">
-                                    <th className="p-3 text-sm font-semibold text-gray-300">Nama Siswa</th>
-                                    <th className="p-3 text-sm font-semibold text-gray-300 text-center">Ayat Dihafal</th>
-                                    <th className="p-3 text-sm font-semibold text-gray-300 text-center hidden sm:table-cell">Progres</th>
+                            <thead className="bg-slate-50 dark:bg-slate-800/50">
+                                <tr>
+                                    <th className="p-3 text-sm font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Nama Siswa</th>
+                                    <th className="p-3 text-sm font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider text-center">Ayat Dihafal</th>
+                                    <th className="p-3 text-sm font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider text-center hidden sm:table-cell">Progres</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="divide-y divide-border dark:divide-dark-border">
                                 {studentProgressData.map((student) => (
-                                    <tr key={student.id} className="border-b border-dark-glass-border last:border-b-0 hover:bg-slate-800/50 transition-colors">
+                                    <tr key={student.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors">
                                         <td className="p-3">
-                                            <button onClick={() => onSelectStudent(student.id)} className="font-medium hover:text-brand-accent transition-colors">
+                                            <button onClick={() => onSelectStudent(student.id)} className="font-medium text-slate-700 dark:text-slate-200 hover:text-brand-accent transition-colors">
                                                 {student.name}
                                             </button>
                                         </td>
-                                        <td className="p-3 text-center text-gray-200">{student.totalMemorizedAyat.toLocaleString()} / {student.totalTargetAyat.toLocaleString()}</td>
+                                        <td className="p-3 text-center text-sm text-slate-600 dark:text-slate-300">{student.totalMemorizedAyat.toLocaleString()} / {student.totalTargetAyat.toLocaleString()}</td>
                                         <td className="p-3 text-center hidden sm:table-cell">
-                                            <div className="w-full bg-gray-700 rounded-full h-2.5">
+                                            <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5">
                                                 <div className="bg-brand-accent h-2.5 rounded-full" style={{ width: `${student.percentage}%` }}></div>
                                             </div>
-                                            <p className="text-xs mt-1 text-gray-400">{student.percentage.toFixed(1)}%</p>
+                                            <p className="text-xs mt-1 text-slate-500 dark:text-slate-400">{student.percentage.toFixed(1)}%</p>
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
-                </GlassCard>
+                </Card>
             </div>
         </div>
     );

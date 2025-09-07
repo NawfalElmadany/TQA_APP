@@ -15,6 +15,7 @@ import StudentDashboard from './components/StudentDashboard';
 import DailyNotesPage from './components/DailyNotesPage';
 import RemindersPage from './components/RemindersPage';
 import PengaturanPage from './components/PengaturanPage';
+import ThemeSwitcher from './components/ThemeSwitcher';
 
 type UserType = 'teacher' | 'student';
 type LoginView = 'landing' | 'teacher' | 'student';
@@ -123,16 +124,26 @@ const App: React.FC = () => {
   }
 
   if (!userType) {
-    return renderLoginFlow();
+    return (
+      <>
+        {renderLoginFlow()}
+        <ThemeSwitcher />
+      </>
+    );
   }
 
   if (userType === 'student' && loggedInStudentId) {
-    return <StudentDashboard studentId={loggedInStudentId} onLogout={handleLogout} />;
+     return (
+        <>
+            <StudentDashboard studentId={loggedInStudentId} onLogout={handleLogout} />
+            <ThemeSwitcher />
+        </>
+    );
   }
   
   if (userType === 'teacher') {
     return (
-      <div className="min-h-screen flex flex-col md:flex-row text-white font-sans">
+      <div className="min-h-screen flex flex-col md:flex-row font-sans">
         <Sidebar 
           activePage={activePage} 
           setActivePage={setActivePage} 
@@ -143,6 +154,7 @@ const App: React.FC = () => {
         <main className="flex-1 p-4 md:p-8 overflow-y-auto">
           {renderTeacherContent()}
         </main>
+        <ThemeSwitcher />
       </div>
     );
   }

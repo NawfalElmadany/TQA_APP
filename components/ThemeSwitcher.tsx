@@ -1,8 +1,8 @@
 import React from 'react';
-import { useTheme, ACCENT_COLORS, AccentColorName } from '../contexts/ThemeContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 const ThemeSwitcher: React.FC = () => {
-  const { themeMode, setThemeMode, accentColor, setAccentColor } = useTheme();
+  const { themeMode, setThemeMode } = useTheme();
 
   const toggleTheme = () => {
     setThemeMode(themeMode === 'light' ? 'dark' : 'light');
@@ -22,29 +22,13 @@ const ThemeSwitcher: React.FC = () => {
 
   return (
     <div className="fixed bottom-5 right-5 z-50">
-      <div className="bg-white/50 dark:bg-black/50 backdrop-blur-lg border border-gray-200 dark:border-gray-700 rounded-full p-2 flex items-center space-x-2 shadow-lg">
-        <button
-          onClick={toggleTheme}
-          className="p-2 rounded-full text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-          aria-label={`Switch to ${themeMode === 'light' ? 'dark' : 'light'} mode`}
-        >
-          {themeMode === 'light' ? <MoonIcon /> : <SunIcon />}
-        </button>
-
-        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
-
-        {Object.keys(ACCENT_COLORS).map((color) => (
-          <button
-            key={color}
-            onClick={() => setAccentColor(color as AccentColorName)}
-            className={`w-6 h-6 rounded-full transition-transform hover:scale-110 ${
-              accentColor === color ? 'ring-2 ring-offset-2 ring-offset-gray-100 dark:ring-offset-gray-800 ring-brand-accent' : ''
-            }`}
-            style={{ backgroundColor: `hsl(${ACCENT_COLORS[color as AccentColorName].h}, ${ACCENT_COLORS[color as AccentColorName].s}%, ${ACCENT_COLORS[color as AccentColorName].l}%)` }}
-            aria-label={`Set accent color to ${color}`}
-          ></button>
-        ))}
-      </div>
+      <button
+        onClick={toggleTheme}
+        className="p-3 bg-white/50 dark:bg-black/50 backdrop-blur-lg border border-gray-200 dark:border-gray-700 rounded-full text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors shadow-lg"
+        aria-label={`Switch to ${themeMode === 'light' ? 'dark' : 'light'} mode`}
+      >
+        {themeMode === 'light' ? <MoonIcon /> : <SunIcon />}
+      </button>
     </div>
   );
 };

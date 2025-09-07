@@ -5,8 +5,8 @@ import { TextArea, Button, SuccessMessage } from './FormCard';
 import Icon from './Icon';
 import DeleteReminderConfirmationModal from './DeleteReminderConfirmationModal';
 
-const GlassCard: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => (
-  <div className={`bg-dark-glass-bg backdrop-blur-xl border border-dark-glass-border rounded-2xl p-6 ${className}`}>
+const Card: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => (
+  <div className={`bg-card dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-6 shadow-sm ${className}`}>
     {children}
   </div>
 );
@@ -82,14 +82,14 @@ const RemindersPage: React.FC<RemindersPageProps> = ({ onRemindersUpdate }) => {
   
   return (
     <div className="space-y-8 animate-fade-in">
-        <div>
-            <h2 className="text-3xl font-bold text-white mb-2">Pengingat & Rencana</h2>
-            <p className="text-gray-400">Atur pengingat atau rencana untuk kegiatan mengajar.</p>
+        <div className="border-b border-border dark:border-dark-border pb-5">
+            <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-50 mb-1">Pengingat & Rencana</h2>
+            <p className="text-slate-500 dark:text-slate-400">Atur pengingat atau rencana untuk kegiatan mengajar.</p>
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <GlassCard>
-                <h3 className="text-xl font-semibold mb-4 text-white flex items-center gap-2">
+            <Card>
+                <h3 className="text-xl font-semibold mb-4 text-slate-900 dark:text-slate-100 flex items-center gap-2">
                     <Icon name="bookmark" className="w-6 h-6" />
                     Buat Pengingat Baru
                 </h3>
@@ -113,30 +113,30 @@ const RemindersPage: React.FC<RemindersPageProps> = ({ onRemindersUpdate }) => {
                         {feedbackMessage && <SuccessMessage>{feedbackMessage}</SuccessMessage>}
                     </div>
                 </div>
-            </GlassCard>
+            </Card>
 
-             <GlassCard>
-                <h3 className="text-xl font-semibold mb-4 text-white">Daftar Pengingat Tersimpan</h3>
+             <Card>
+                <h3 className="text-xl font-semibold mb-4 text-slate-900 dark:text-slate-100">Daftar Pengingat Tersimpan</h3>
                 <div className="space-y-3 max-h-[24.5rem] overflow-y-auto pr-2">
                     {reminders.length > 0 ? reminders.map(reminder => (
-                        <div key={reminder.id} className="bg-slate-800/50 p-3 rounded-lg group flex justify-between items-start gap-3">
+                        <div key={reminder.id} className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg group flex justify-between items-start gap-3 border border-border dark:border-dark-border">
                             <div className="flex-grow">
-                                <p className="text-gray-200 whitespace-pre-wrap">{reminder.content}</p>
-                                <p className="text-xs text-gray-500 mt-2">{new Date(reminder.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric'})}</p>
+                                <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{reminder.content}</p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">{new Date(reminder.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric'})}</p>
                             </div>
                             <button
                                 onClick={() => setReminderToDelete(reminder)}
-                                className="p-1.5 text-red-500 hover:text-red-400 hover:bg-slate-700 rounded-full transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0"
+                                className="p-1.5 text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-500 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-full transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0"
                                 aria-label="Hapus Pengingat"
                             >
                                 <Icon name="trash" className="w-4 h-4" />
                             </button>
                         </div>
                     )) : (
-                        <p className="text-center text-gray-400 text-sm pt-4">Belum ada pengingat yang disimpan.</p>
+                        <p className="text-center text-slate-500 dark:text-slate-400 text-sm pt-4">Belum ada pengingat yang disimpan.</p>
                     )}
                 </div>
-            </GlassCard>
+            </Card>
         </div>
         
         {reminderToDelete && (
