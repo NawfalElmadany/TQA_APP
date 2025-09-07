@@ -41,9 +41,8 @@ const LaporanForm: React.FC = () => {
       return;
     }
 
-    const doc = new jsPDF();
-    // FIX: Explicitly type style properties for jspdf-autotable to prevent type inference issues.
-    // 'halign' and 'valign' values are cast to their specific literal types.
+    const doc = new jsPDF({ orientation: 'landscape', format: 'a4' });
+    
     const head = [
         [
             { content: 'No.', rowSpan: 2, styles: { halign: 'center' as const, valign: 'middle' as const } },
@@ -52,7 +51,7 @@ const LaporanForm: React.FC = () => {
             { content: 'Hafalan', colSpan: 2, styles: { halign: 'center' as const } },
             { content: 'Murojaah', colSpan: 2, styles: { halign: 'center' as const } }
         ],
-        ['Awal', 'Akhir', 'Awal', 'Akhir', 'Awal', 'Akhir']
+        ['Awal Periode', 'Akhir Periode', 'Awal Periode', 'Akhir Periode', 'Awal Periode', 'Akhir Periode']
     ];
     
     const body = reportData.map((student, index) => [
@@ -66,30 +65,45 @@ const LaporanForm: React.FC = () => {
       student.murojaah.akhir
     ]);
     
-    // FIX: The `fillColor` property for jspdf-autotable's styles expects a mutable array (e.g., [r, g, b]),
-    // not a readonly tuple. Removing 'as const' from the color arrays resolves the type incompatibility.
-    const headStyles = { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'bold' as const };
-    const alternateRowStyles = { fillColor: [245, 245, 245] };
+    // FIX: Use `as const` on RGB color arrays to prevent TypeScript from widening their types
+    // to `number[]`. This ensures they are correctly typed as tuples (`[number, number, number]`),
+    // which is required by `jspdf-autotable` for `fillColor` style properties.
+    const headStyles = { fillColor: [41, 128, 185] as const, textColor: 255, fontStyle: 'bold' as const };
+    const alternateRowStyles = { fillColor: [245, 245, 245] as const };
 
     autoTable(doc, {
       head: head,
       body: body,
-      startY: 30,
-      headStyles: headStyles,
+      startY: 35,
+      styles: {
+          fontSize: 8,
+          cellPadding: 2,
+      },
+      headStyles: { 
+          ...headStyles, 
+          fontSize: 9,
+          halign: 'center' as const,
+          valign: 'middle' as const,
+      },
+      columnStyles: {
+          0: { cellWidth: 10, halign: 'center' as const },
+          1: { cellWidth: 40 }, // Fixed width for name
+      },
       alternateRowStyles: alternateRowStyles,
       didDrawPage: function (data) {
         // Header
-        doc.setFontSize(20);
+        doc.setFontSize(18);
         doc.setTextColor(40);
         doc.text("Laporan Perkembangan Siswa TQA", data.settings.margin.left, 15);
-        doc.setFontSize(12);
-        doc.text(`Kelas: ${selectedClass}`, data.settings.margin.left, 22);
-        doc.text(`Periode: ${formatDate(startDate)} - ${formatDate(endDate)}`, data.settings.margin.left + 50, 22);
+        doc.setFontSize(11);
+        doc.text(`Kelas: ${selectedClass}`, data.settings.margin.left, 24);
+        doc.text(`Periode: ${formatDate(startDate)} - ${formatDate(endDate)}`, doc.internal.pageSize.width - data.settings.margin.right, 24, { align: 'right' });
         
         // Footer
         const pageCount = (doc as any).internal.getNumberOfPages();
-        doc.setFontSize(10);
+        doc.setFontSize(9);
         doc.text(`Halaman ${data.pageNumber} dari ${pageCount}`, data.settings.margin.left, doc.internal.pageSize.height - 10);
+        doc.text(`Dicetak pada: ${new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric'})}`, doc.internal.pageSize.width - data.settings.margin.right, doc.internal.pageSize.height - 10, { align: 'right' });
       },
     });
 
