@@ -1,10 +1,35 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { getCustomLogo } from '../data/dataService';
 
 interface LogoProps {
   className?: string;
 }
 
 const Logo: React.FC<LogoProps> = ({ className = 'w-10 h-10' }) => {
+  const [customLogo, setCustomLogo] = useState<string | null>(null);
+
+  useEffect(() => {
+    const updateLogo = () => {
+        setCustomLogo(getCustomLogo());
+    };
+    updateLogo(); // Initial load
+
+    // Custom event for instant updates within the same tab
+    window.addEventListener('logoUpdated', updateLogo);
+    
+    // Also listen to storage events as a fallback for cross-tab updates
+    window.addEventListener('storage', updateLogo);
+
+    return () => {
+      window.removeEventListener('logoUpdated', updateLogo);
+      window.removeEventListener('storage', updateLogo);
+    };
+  }, []);
+
+  if (customLogo) {
+    return <img src={customLogo} alt="Logo TQA App" className={className} />;
+  }
+
   return (
     <>
       <style>{`

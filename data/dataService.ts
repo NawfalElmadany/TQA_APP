@@ -3,6 +3,7 @@ import { STUDENTS_INITIAL_NAMES, JUZ_29_SURAHS, JUZ_30_SURAHS, TARTILI_LEVELS } 
 
 const DB_KEY = 'al-irsyad-monitoring-data';
 const TEACHER_PROFILE_KEY = 'al-irsyad-teacher-profile';
+const CUSTOM_LOGO_KEY = 'tqa-app-custom-logo';
 
 interface AppData {
   users: User[];
@@ -661,6 +662,20 @@ export const getReportDataForClass = (className: string, startDate: string, endD
 
 // --- DATA MANAGEMENT ---
 
+// --- CUSTOM LOGO ---
+export const getCustomLogo = (): string | null => {
+    return localStorage.getItem(CUSTOM_LOGO_KEY);
+};
+
+export const saveCustomLogo = (logoDataUrl: string) => {
+    localStorage.setItem(CUSTOM_LOGO_KEY, logoDataUrl);
+};
+
+export const deleteCustomLogo = () => {
+    localStorage.removeItem(CUSTOM_LOGO_KEY);
+};
+
+
 export const exportAllData = (): { success: boolean, message?: string, data?: string } => {
   try {
     const mainDataString = localStorage.getItem(DB_KEY);
@@ -673,6 +688,7 @@ export const exportAllData = (): { success: boolean, message?: string, data?: st
     const exportObject = {
       db: JSON.parse(mainDataString),
       profile: teacherProfileString ? JSON.parse(teacherProfileString) : getTeacherProfile(),
+      logo: getCustomLogo(),
     };
 
     const jsonString = JSON.stringify(exportObject, null, 2);
@@ -695,8 +711,11 @@ export const importAllData = (jsonString: string): { success: boolean, message: 
     localStorage.setItem(DB_KEY, JSON.stringify(data.db));
     localStorage.setItem(TEACHER_PROFILE_KEY, JSON.stringify(data.profile));
     
-    // Clean up old logo data if it exists
-    localStorage.removeItem('tqa-app-custom-logo');
+    if (data.logo) {
+      saveCustomLogo(data.logo);
+    } else {
+      deleteCustomLogo();
+    }
 
     return { success: true, message: 'Data berhasil diimpor! Aplikasi akan dimuat ulang.' };
   } catch (error) {

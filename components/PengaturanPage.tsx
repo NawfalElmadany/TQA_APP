@@ -1,8 +1,9 @@
-import React, { useState, useRef } from 'react';
-import { exportAllData, importAllData } from '../data/dataService';
+import React, { useState, useRef, useEffect } from 'react';
+import { exportAllData, importAllData, saveCustomLogo, deleteCustomLogo, getCustomLogo } from '../data/dataService';
 import { Button, ErrorMessage, SuccessMessage } from './FormCard';
 import Icon from './Icon';
 import ImportConfirmationModal from './ImportConfirmationModal';
+import Logo from './Logo';
 
 const Card: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => (
   <div className={`bg-card dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-6 md:p-8 shadow-sm ${className}`}>
@@ -10,12 +11,17 @@ const Card: React.FC<{ children: React.ReactNode, className?: string }> = ({ chi
   </div>
 );
 
-// FIX: Implement the PengaturanPage component to resolve import errors and syntax errors from an incomplete file.
 const PengaturanPage: React.FC = () => {
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error', message: string } | null>(null);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const logoFileInputRef = useRef<HTMLInputElement>(null);
+  const [currentLogo, setCurrentLogo] = useState<string | null>(null);
+
+  useEffect(() => {
+    setCurrentLogo(getCustomLogo());
+  }, []);
 
   const showFeedback = (message: string, type: 'success' | 'error' = 'success') => {
     setFeedback({ type, message });
@@ -48,7 +54,6 @@ const PengaturanPage: React.FC = () => {
     } else {
       showFeedback('Harap pilih file JSON yang valid.', 'error');
     }
-    // Reset file input to allow selecting the same file again
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -64,7 +69,6 @@ const PengaturanPage: React.FC = () => {
         const result = importAllData(content);
         if (result.success) {
           showFeedback(result.message);
-          // Reload the application after a short delay to apply changes
           setTimeout(() => window.location.reload(), 2000);
         } else {
           showFeedback(result.message, 'error');
@@ -80,12 +84,34 @@ const PengaturanPage: React.FC = () => {
     setImportFile(null);
   };
 
+  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        saveCustomLogo(result);
+        setCurrentLogo(result);
+        window.dispatchEvent(new Event('logoUpdated'));
+        showFeedback('Logo berhasil diperbarui!');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveLogo = () => {
+    deleteCustomLogo();
+    setCurrentLogo(null);
+    window.dispatchEvent(new Event('logoUpdated'));
+    showFeedback('Logo kustom telah dihapus.');
+  };
+
   return (
     <>
       <div className="space-y-8 animate-fade-in">
         <div className="border-b border-border dark:border-dark-border pb-5">
             <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-50 mb-1">Pengaturan Aplikasi</h2>
-            <p className="text-slate-500 dark:text-slate-400">Kelola data aplikasi.</p>
+            <p className="text-slate-500 dark:text-slate-400">Kelola data dan personalisasi aplikasi.</p>
         </div>
 
         {feedback && (
@@ -98,7 +124,45 @@ const PengaturanPage: React.FC = () => {
           </div>
         )}
 
-        <div className="max-w-xl">
+        <div className="max-w-xl space-y-6">
+            <Card>
+                <h3 className="text-xl font-semibold mb-2 text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                    <Icon name="profil" className="w-6 h-6"/>
+                    Personalisasi
+                </h3>
+                <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">Ubah logo aplikasi agar sesuai dengan identitas Anda.</p>
+                
+                <div className="mt-6 flex items-center gap-6 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                    <Logo className="w-16 h-16 flex-shrink-0" />
+                    <div className="flex-grow">
+                        <h4 className="font-semibold text-slate-800 dark:text-slate-100">Logo Aplikasi</h4>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">Gunakan file gambar (.png, .jpg, .svg).</p>
+                    </div>
+                </div>
+
+                <input
+                    type="file"
+                    ref={logoFileInputRef}
+                    onChange={handleLogoUpload}
+                    className="hidden"
+                    accept="image/*"
+                />
+
+                <div className="flex flex-col sm:flex-row gap-4 mt-6">
+                    <Button type="button" onClick={() => logoFileInputRef.current?.click()} className="w-full">
+                        Ubah Logo
+                    </Button>
+                    <button 
+                        type="button" 
+                        onClick={handleRemoveLogo}
+                        disabled={!currentLogo}
+                        className="w-full bg-transparent border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-medium py-3 px-4 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                    >
+                        Hapus Logo Kustom
+                    </button>
+                </div>
+            </Card>
+
             <Card>
                 <h3 className="text-xl font-semibold mb-4 text-slate-900 dark:text-slate-100 flex items-center gap-2">
                     <Icon name="settings" className="w-6 h-6"/>
