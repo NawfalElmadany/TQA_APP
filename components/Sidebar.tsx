@@ -1,0 +1,105 @@
+
+import React, { useState } from 'react';
+import { Page } from '../types';
+import Icon from './Icon';
+import Logo from './Logo';
+import LogoutConfirmationModal from './LogoutConfirmationModal';
+
+interface SidebarProps {
+  activePage: Page;
+  setActivePage: (page: Page) => void;
+  onLogout: () => void;
+  unreadReminderCount: number;
+  onMarkRemindersAsRead: () => void;
+}
+
+const NavItem: React.FC<{
+  page: Page;
+  iconName: 'dashboard' | 'target' | 'input' | 'laporan' | 'profil' | 'notes' | 'calendar' | 'settings';
+  activePage: Page;
+  onClick: () => void;
+  badgeCount?: number;
+}> = ({ page, iconName, activePage, onClick, badgeCount }) => {
+  const isActive = activePage === page;
+  return (
+    <li
+      onClick={onClick}
+      className={`flex items-center space-x-4 p-3 rounded-lg cursor-pointer transition-all duration-300 ease-in-out ${
+        isActive
+          ? 'bg-brand-accent text-white shadow-lg scale-105'
+          : 'text-gray-300 hover:bg-brand-accent/20 hover:text-white transform hover:scale-[1.03] active:scale-100 active:bg-brand-accent/30'
+      }`}
+    >
+      <Icon name={iconName} />
+      <span className="font-medium">{page}</span>
+      {badgeCount !== undefined && badgeCount > 0 && (
+        <span className="ml-auto bg-brand-red text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center animate-fade-in">
+          {badgeCount > 9 ? '9+' : badgeCount}
+        </span>
+      )}
+    </li>
+  );
+};
+
+const Sidebar: React.FC<SidebarProps> = ({ activePage, setActivePage, onLogout, unreadReminderCount, onMarkRemindersAsRead }) => {
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+
+  const handleLogoutConfirm = () => {
+    onLogout();
+    setIsLogoutModalOpen(false);
+  };
+  
+  const handlePengingatClick = () => {
+    setActivePage(Page.Pengingat);
+    onMarkRemindersAsRead();
+  };
+
+  return (
+    <>
+      <aside className="w-full md:w-64 bg-dark-glass-bg backdrop-blur-xl border-r border-dark-glass-border p-4 md:p-6 flex-shrink-0 flex flex-col justify-between">
+        <div>
+          <div className="flex items-center space-x-3 mb-10">
+            <Logo className="w-10 h-10" />
+            <h1 className="text-xl font-bold text-white">TQA APP</h1>
+          </div>
+          <nav>
+            <ul className="space-y-3">
+              <NavItem page={Page.Dashboard} iconName="dashboard" activePage={activePage} onClick={() => setActivePage(Page.Dashboard)} />
+              <NavItem page={Page.TargetHafalan} iconName="target" activePage={activePage} onClick={() => setActivePage(Page.TargetHafalan)} />
+              <NavItem page={Page.InputData} iconName="input" activePage={activePage} onClick={() => setActivePage(Page.InputData)} />
+              <NavItem page={Page.CatatanHarian} iconName="notes" activePage={activePage} onClick={() => setActivePage(Page.CatatanHarian)} />
+              <NavItem 
+                page={Page.Pengingat} 
+                iconName="calendar" 
+                activePage={activePage} 
+                onClick={handlePengingatClick}
+                badgeCount={unreadReminderCount}
+              />
+              <NavItem page={Page.Laporan} iconName="laporan" activePage={activePage} onClick={() => setActivePage(Page.Laporan)} />
+              <NavItem page={Page.Profil} iconName="profil" activePage={activePage} onClick={() => setActivePage(Page.Profil)} />
+              <NavItem page={Page.Pengaturan} iconName="settings" activePage={activePage} onClick={() => setActivePage(Page.Pengaturan)} />
+            </ul>
+          </nav>
+        </div>
+        
+        <div>
+          <button
+            onClick={() => setIsLogoutModalOpen(true)}
+            className="flex items-center space-x-4 p-3 rounded-lg cursor-pointer transition-all duration-200 ease-in-out w-full text-red-400 hover:bg-red-500/20 hover:text-red-300"
+            aria-label="Logout"
+          >
+            <Icon name="logout" className="w-6 h-6" />
+            <span className="font-medium">Logout</span>
+          </button>
+        </div>
+      </aside>
+      <LogoutConfirmationModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={handleLogoutConfirm}
+      />
+    </>
+  );
+};
+
+export default Sidebar;

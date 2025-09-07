@@ -1,0 +1,8 @@
+{
+  "name": "TQA APP",
+  "description": "A modern, minimalist, and professional web-based UI for monitoring student Quranic recitation progress, featuring a dark theme with glassmorphism effects. It includes a dashboard, progress tracking forms, and navigation.",
+  "requestFramePermissions": [
+    "microphone",
+    "camera"
+  ]
+}
