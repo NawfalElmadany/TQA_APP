@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Page } from './types';
 import Sidebar from './components/Sidebar';
@@ -8,7 +9,7 @@ import StudentProfile from './components/StudentProfile';
 import TargetHafalanDashboard from './components/TargetHafalanDashboard';
 import LaporanForm from './components/LaporanForm';
 import InputDataForm from './components/InputDataForm';
-import { initializeDB, getReminders } from './data/dataService';
+import { getRemindersCount, getSession, signOut } from './data/dataService';
 import LandingPage from './components/LandingPage';
 import StudentLoginPage from './components/StudentLoginPage';
 import StudentDashboard from './components/StudentDashboard';
@@ -16,11 +17,15 @@ import DailyNotesPage from './components/DailyNotesPage';
 import RemindersPage from './components/RemindersPage';
 import PengaturanPage from './components/PengaturanPage';
 import ThemeSwitcher from './components/ThemeSwitcher';
+import JadwalPelajaranPage from './components/JadwalPelajaranPage';
+import Icon from './components/Icon';
 
 type UserType = 'teacher' | 'student';
 type LoginView = 'landing' | 'teacher' | 'student';
 
 const App: React.FC = () => {
+  const [session, setSession] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [userType, setUserType] = useState<UserType | null>(null);
   const [loginView, setLoginView] = useState<LoginView>('landing');
   const [loggedInStudentId, setLoggedInStudentId] = useState<number | null>(null);
@@ -29,37 +34,46 @@ const App: React.FC = () => {
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
   const [unreadReminderCount, setUnreadReminderCount] = useState(0);
 
-  const refreshReminderCounts = () => {
-    const totalCount = getReminders().length;
-    const lastSeenTotal = parseInt(localStorage.getItem('lastSeenReminderTotal') || '0');
-    const unreadCount = totalCount - lastSeenTotal;
-    setUnreadReminderCount(Math.max(0, unreadCount));
+  // FIX: Make refreshReminderCounts async to await getRemindersCount.
+  const refreshReminderCounts = async () => {
+    if(!session) return;
+    const { totalCount, unreadCount } = await getRemindersCount();
+    setUnreadReminderCount(unreadCount);
   };
   
   const markRemindersAsRead = () => {
-    const totalCount = getReminders().length;
-    localStorage.setItem('lastSeenReminderTotal', String(totalCount));
+    localStorage.setItem('lastSeenReminderTotal', String(unreadReminderCount + parseInt(localStorage.getItem('lastSeenReminderTotal') || '0')));
     setUnreadReminderCount(0);
   };
 
   useEffect(() => {
-    initializeDB();
-    refreshReminderCounts();
+    const checkSession = async () => {
+      const currentSession = await getSession();
+      setSession(currentSession);
+      if (currentSession) {
+        setUserType('teacher');
+      }
+      setLoading(false);
+    };
+    checkSession();
   }, []);
-
-  const handleTeacherLogin = () => {
-    setUserType('teacher');
-    setLoginView('landing'); // Reset login view
-    setActivePage(Page.Dashboard);
-  };
+  
+  useEffect(() => {
+      if (session) {
+          refreshReminderCounts();
+      }
+  }, [session]);
 
   const handleStudentLogin = (studentId: number) => {
     setUserType('student');
     setLoggedInStudentId(studentId);
-    setLoginView('landing'); // Reset login view
+    setLoginView('landing');
   };
 
-  const handleLogout = () => {
+  // FIX: Make handleLogout async to await signOut.
+  const handleLogout = async () => {
+    await signOut();
+    setSession(null);
     setUserType(null);
     setLoginView('landing');
     setLoggedInStudentId(null);
@@ -73,12 +87,12 @@ const App: React.FC = () => {
 
   const handleSelectStudent = (id: number) => {
     setSelectedStudentId(id);
-    setActivePage(Page.Profil); // Switch to profile view context
+    setActivePage(Page.Profil);
   };
 
   const handleBackToProfileList = () => {
     setSelectedStudentId(null);
-    setActivePage(Page.Profil); // Go back to the list view
+    setActivePage(Page.Profil);
   };
   
   const renderTeacherContent = () => {
@@ -99,6 +113,8 @@ const App: React.FC = () => {
         return <RemindersPage onRemindersUpdate={refreshReminderCounts} />;
       case Page.Laporan:
         return <LaporanForm />;
+      case Page.JadwalPelajaran:
+        return <JadwalPelajaranPage />;
       case Page.Profil:
         return <ProfilPage onSelectStudent={handleSelectStudent} />;
       case Page.Pengaturan:
@@ -111,7 +127,7 @@ const App: React.FC = () => {
   const renderLoginFlow = () => {
     switch(loginView) {
       case 'teacher':
-        return <TeacherLoginPage onLogin={handleTeacherLogin} onBack={handleBackToLanding} />;
+        return <TeacherLoginPage onLogin={() => window.location.reload()} onBack={handleBackToLanding} />;
       case 'student':
         return <StudentLoginPage onLogin={handleStudentLogin} onBack={handleBackToLanding} />;
       case 'landing':
@@ -121,6 +137,17 @@ const App: React.FC = () => {
           onSelectStudentLogin={() => setLoginView('student')} 
         />;
     }
+  }
+  
+  if (loading) {
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-background dark:bg-dark-background">
+            <div className="flex flex-col items-center gap-4">
+                <Icon name="spinner" className="w-12 h-12 text-brand-accent animate-spin-slow" />
+                <p className="text-slate-600 dark:text-slate-300">Memuat Aplikasi...</p>
+            </div>
+        </div>
+    );
   }
 
   if (!userType) {
@@ -141,7 +168,7 @@ const App: React.FC = () => {
     );
   }
   
-  if (userType === 'teacher') {
+  if (userType === 'teacher' && session) {
     return (
       <div className="min-h-screen flex flex-col md:flex-row font-sans">
         <Sidebar 

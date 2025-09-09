@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { FormGroup, Select, Input, TextArea, Button, ErrorMessage } from './FormCard';
 import { SURAHS } from '../constants';
@@ -38,7 +39,11 @@ const HafalanForm: React.FC = () => {
 
 
   useEffect(() => {
-    setClasses(getClasses());
+    // FIX: Fetch classes asynchronously.
+    const fetchClasses = async () => {
+        setClasses(await getClasses());
+    };
+    fetchClasses();
 
     if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
       console.error("Speech Recognition not supported by this browser.");
@@ -77,11 +82,12 @@ const HafalanForm: React.FC = () => {
     };
   }, []);
 
-  const handleClassChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  // FIX: Make handleClassChange async to await getStudents.
+  const handleClassChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newClass = e.target.value;
     setSelectedClass(newClass);
     if (newClass) {
-      setFilteredStudents(getStudents(newClass));
+      setFilteredStudents(await getStudents(newClass));
     } else {
       setFilteredStudents([]);
     }
@@ -123,7 +129,8 @@ const HafalanForm: React.FC = () => {
       return null;
   };
 
-  const handleVoiceResult = (transcript: string) => {
+  // FIX: Make handleVoiceResult async to await getStudents.
+  const handleVoiceResult = async (transcript: string) => {
     const lowerTranscript = transcript.toLowerCase();
     console.log('Voice Transcript:', lowerTranscript);
 
@@ -132,7 +139,7 @@ const HafalanForm: React.FC = () => {
     const normalizedTranscript = normalize(transcript);
 
     // --- Parse All Potential Fields ---
-    const allStudents = getStudents();
+    const allStudents = await getStudents();
     const studentMatch = allStudents.find(s => lowerTranscript.includes(s.name.toLowerCase()));
     
     // Improved surah matching
@@ -149,7 +156,7 @@ const HafalanForm: React.FC = () => {
 
     if (studentMatch) {
       const studentClass = studentMatch.class;
-      const studentsInThatClass = getStudents(studentClass);
+      const studentsInThatClass = await getStudents(studentClass);
       setSelectedClass(studentClass);
       setFilteredStudents(studentsInThatClass);
       setStudentId(String(studentMatch.id));
@@ -160,7 +167,7 @@ const HafalanForm: React.FC = () => {
         const foundClass = classes.find(c => c.replace(/\s+/g, '') === parsedClassName);
         if (foundClass) {
           setSelectedClass(foundClass);
-          setFilteredStudents(getStudents(foundClass));
+          setFilteredStudents(await getStudents(foundClass));
           setStudentId('');
         }
       }
@@ -216,15 +223,17 @@ const HafalanForm: React.FC = () => {
     setUndoMessage('');
   };
 
-  const handleCorrectData = () => {
+  // FIX: Make handleCorrectData async to await data operations.
+  const handleCorrectData = async () => {
     if (!lastSubmission) return;
 
-    deleteLastHafalanRecord(lastSubmission.studentId);
+    await deleteLastHafalanRecord(lastSubmission.studentId);
     
-    const student = getStudents().find(s => s.id === lastSubmission.studentId);
+    const allStudents = await getStudents();
+    const student = allStudents.find(s => s.id === lastSubmission.studentId);
     if (student) {
         setSelectedClass(student.class);
-        setFilteredStudents(getStudents(student.class));
+        setFilteredStudents(await getStudents(student.class));
     }
     setStudentId(String(lastSubmission.studentId));
     setSurah(lastSubmission.surah);
@@ -239,9 +248,10 @@ const HafalanForm: React.FC = () => {
     setUndoMessage('');
   };
 
-  const handleDeleteData = () => {
+  // FIX: Make handleDeleteData async.
+  const handleDeleteData = async () => {
       if (!lastSubmission) return;
-      deleteLastHafalanRecord(lastSubmission.studentId);
+      await deleteLastHafalanRecord(lastSubmission.studentId);
       setUndoMessage('Data terakhir telah dihapus.');
       setTimeout(() => {
           handleInputLagi();
@@ -292,13 +302,14 @@ const HafalanForm: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // FIX: Make handleSubmit async to await data operations.
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
     const ayat = (!ayatTo || ayatFrom === ayatTo) ? ayatFrom : `${ayatFrom}-${ayatTo}`;
     const studentIdNum = Number(studentId);
-    addHafalanRecord(studentIdNum, {
+    await addHafalanRecord(studentIdNum, {
       date,
       surah,
       ayat,
@@ -306,7 +317,8 @@ const HafalanForm: React.FC = () => {
       notes,
     });
 
-    const student = getStudents().find(s => s.id === studentIdNum);
+    const allStudents = await getStudents();
+    const student = allStudents.find(s => s.id === studentIdNum);
     setLastSubmission({
       studentId: studentIdNum,
       studentName: student?.name || 'Siswa',

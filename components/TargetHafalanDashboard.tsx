@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { getAllProfiles } from '../data/dataService';
 import { StudentProfileData } from '../types';
@@ -63,8 +64,12 @@ const CircularProgress: React.FC<{ progress: number, size?: number, strokeWidth?
 const TargetHafalanDashboard: React.FC<TargetHafalanDashboardProps> = ({ onSelectStudent }) => {
     const [studentProfiles, setStudentProfiles] = useState<StudentProfileData[]>([]);
 
+    // FIX: Use an async function inside useEffect to fetch data.
     useEffect(() => {
-        setStudentProfiles(getAllProfiles());
+        const fetchData = async () => {
+            setStudentProfiles(await getAllProfiles());
+        };
+        fetchData();
     }, []);
 
     const studentProgressData = studentProfiles.map(student => {

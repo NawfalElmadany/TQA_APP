@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -13,8 +14,12 @@ const LaporanForm: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
 
+  // FIX: Fetch classes asynchronously.
   useEffect(() => {
-    setClasses(getClasses());
+    const fetchClasses = async () => {
+        setClasses(await getClasses());
+    };
+    fetchClasses();
   }, []);
 
   const formatDate = (dateString: string) => {
@@ -23,7 +28,8 @@ const LaporanForm: React.FC = () => {
     });
   };
 
-  const generatePdf = () => {
+  // FIX: Make generatePdf async to await getReportDataForClass.
+  const generatePdf = async () => {
     setIsLoading(true);
     setError('');
 
@@ -33,7 +39,7 @@ const LaporanForm: React.FC = () => {
       return;
     }
 
-    const reportData = getReportDataForClass(selectedClass, startDate, endDate);
+    const reportData = await getReportDataForClass(selectedClass, startDate, endDate);
 
     if (reportData.length === 0) {
       setError('Tidak ada data yang ditemukan untuk periode dan kelas yang dipilih.');
@@ -65,11 +71,10 @@ const LaporanForm: React.FC = () => {
       student.murojaah.akhir
     ]);
     
-    // FIX: Use `as const` on RGB color arrays to prevent TypeScript from widening their types
-    // to `number[]`. This ensures they are correctly typed as tuples (`[number, number, number]`),
-    // which is required by `jspdf-autotable` for `fillColor` style properties.
-    const headStyles = { fillColor: [41, 128, 185] as const, textColor: 255, fontStyle: 'bold' as const };
-    const alternateRowStyles = { fillColor: [245, 245, 245] as const };
+    // FIX: Removed `as const` from `fillColor` to satisfy the expected mutable array type `[number, number, number]` required by jspdf-autotable styles.
+    const headStyles = { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'bold' as const };
+    // FIX: Removed `as const` from `fillColor` to satisfy the expected mutable array type `[number, number, number]` required by jspdf-autotable styles.
+    const alternateRowStyles = { fillColor: [245, 245, 245] };
 
     autoTable(doc, {
       head: head,

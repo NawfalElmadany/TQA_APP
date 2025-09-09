@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { FormGroup, Select, Input, TextArea, Button, ErrorMessage } from './FormCard';
 import { TARTILI_LEVELS } from '../constants';
@@ -39,7 +40,11 @@ const TartiliForm: React.FC = () => {
   const [undoMessage, setUndoMessage] = useState<string>('');
 
   useEffect(() => {
-    setClasses(getClasses());
+    // FIX: Fetch classes asynchronously.
+    const fetchClasses = async () => {
+        setClasses(await getClasses());
+    };
+    fetchClasses();
     
     if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
       console.error("Speech Recognition not supported by this browser.");
@@ -78,11 +83,12 @@ const TartiliForm: React.FC = () => {
     };
   }, []);
   
-  const handleClassChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  // FIX: Make handleClassChange async to await getStudents.
+  const handleClassChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newClass = e.target.value;
     setSelectedClass(newClass);
     if (newClass) {
-      setFilteredStudents(getStudents(newClass));
+      setFilteredStudents(await getStudents(newClass));
     } else {
       setFilteredStudents([]);
     }
@@ -124,7 +130,8 @@ const TartiliForm: React.FC = () => {
       return null;
   };
 
-  const handleVoiceResult = (transcript: string) => {
+  // FIX: Make handleVoiceResult async to await getStudents.
+  const handleVoiceResult = async (transcript: string) => {
     let lowerTranscript = transcript.toLowerCase();
     console.log('Voice Transcript:', lowerTranscript);
 
@@ -137,7 +144,7 @@ const TartiliForm: React.FC = () => {
     }
 
     // --- Parse All Potential Fields ---
-    const allStudents = getStudents();
+    const allStudents = await getStudents();
     const studentMatch = allStudents.find(s => lowerTranscript.includes(s.name.toLowerCase()));
     const pageRangeMatch = lowerTranscript.match(/(?:halaman|hal)\s+(\d+)\s+(?:sampai|s\.d\.|-)\s+(\d+)/);
     const pageSingleMatch = lowerTranscript.match(/(?:halaman|hal)\s+(\d+)/);
@@ -162,7 +169,7 @@ const TartiliForm: React.FC = () => {
 
     if (studentMatch) {
       const studentClass = studentMatch.class;
-      const studentsInThatClass = getStudents(studentClass);
+      const studentsInThatClass = await getStudents(studentClass);
       setSelectedClass(studentClass);
       setFilteredStudents(studentsInThatClass);
       setStudentId(String(studentMatch.id));
@@ -173,7 +180,7 @@ const TartiliForm: React.FC = () => {
         const foundClass = classes.find(c => c.replace(/\s+/g, '') === parsedClassName);
         if (foundClass) {
           setSelectedClass(foundClass);
-          setFilteredStudents(getStudents(foundClass));
+          setFilteredStudents(await getStudents(foundClass));
           setStudentId('');
         }
       }
@@ -229,15 +236,17 @@ const TartiliForm: React.FC = () => {
     setUndoMessage('');
   };
   
-  const handleCorrectData = () => {
+  // FIX: Make handleCorrectData async to await data operations.
+  const handleCorrectData = async () => {
     if (!lastSubmission) return;
 
-    deleteLastTartiliRecord(lastSubmission.studentId);
+    await deleteLastTartiliRecord(lastSubmission.studentId);
     
-    const student = getStudents().find(s => s.id === lastSubmission.studentId);
+    const allStudents = await getStudents();
+    const student = allStudents.find(s => s.id === lastSubmission.studentId);
     if (student) {
         setSelectedClass(student.class);
-        setFilteredStudents(getStudents(student.class));
+        setFilteredStudents(await getStudents(student.class));
     }
     setStudentId(String(lastSubmission.studentId));
     setLevel(lastSubmission.level);
@@ -258,9 +267,10 @@ const TartiliForm: React.FC = () => {
     setUndoMessage('');
   };
 
-  const handleDeleteData = () => {
+  // FIX: Make handleDeleteData async.
+  const handleDeleteData = async () => {
       if (!lastSubmission) return;
-      deleteLastTartiliRecord(lastSubmission.studentId);
+      await deleteLastTartiliRecord(lastSubmission.studentId);
       setUndoMessage('Data terakhir telah dihapus.');
       setTimeout(() => {
           handleInputLagi();
@@ -302,14 +312,15 @@ const TartiliForm: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // FIX: Make handleSubmit async to await data operations.
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
     
     const pageString = (pageFrom === pageTo || !pageTo) ? pageFrom : `${pageFrom}-${pageTo}`;
     const studentIdNum = Number(studentId);
     
-    addTartiliRecord(studentIdNum, {
+    await addTartiliRecord(studentIdNum, {
       date,
       level,
       page: pageString,
@@ -317,7 +328,8 @@ const TartiliForm: React.FC = () => {
       notes,
     });
     
-    const student = getStudents().find(s => s.id === studentIdNum);
+    const allStudents = await getStudents();
+    const student = allStudents.find(s => s.id === studentIdNum);
     setLastSubmission({
         studentId: studentIdNum,
         studentName: student?.name || 'Siswa',
@@ -329,7 +341,8 @@ const TartiliForm: React.FC = () => {
     });
   };
 
-  const handleLulus = () => {
+  // FIX: Make handleLulus async to await data operations.
+  const handleLulus = async () => {
     const newErrors: { studentId?: string; level?: string; score?: string } = {};
     if (!studentId) newErrors.studentId = 'Siswa harus dipilih untuk menyatakan kelulusan.';
     if (!level) newErrors.level = 'Level Tartili harus dipilih untuk drill.';
@@ -344,9 +357,10 @@ const TartiliForm: React.FC = () => {
     if (Object.keys(newErrors).length > 0) return;
     
     const studentIdNum = Number(studentId);
-    graduateStudentTartili(studentIdNum, level, Number(score), notes, date);
-
-    const student = getStudents().find(s => s.id === studentIdNum);
+    await graduateStudentTartili(studentIdNum, level, Number(score), notes, date);
+    
+    const allStudents = await getStudents();
+    const student = allStudents.find(s => s.id === studentIdNum);
     setLastSubmission({
         studentId: studentIdNum,
         studentName: student?.name || 'Siswa',

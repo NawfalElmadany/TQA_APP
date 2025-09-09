@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { getCustomLogo } from '../data/dataService';
 
@@ -9,8 +10,9 @@ const Logo: React.FC<LogoProps> = ({ className = 'w-10 h-10' }) => {
   const [customLogo, setCustomLogo] = useState<string | null>(null);
 
   useEffect(() => {
-    const updateLogo = () => {
-        setCustomLogo(getCustomLogo());
+    // FIX: Make updateLogo async to await getCustomLogo.
+    const updateLogo = async () => {
+        setCustomLogo(await getCustomLogo());
     };
     updateLogo(); // Initial load
 

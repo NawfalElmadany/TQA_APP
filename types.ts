@@ -30,7 +30,8 @@ export enum Page {
   CatatanHarian = "Catatan Harian",
   Pengingat = "Pengingat",
   Laporan = "Laporan",
-  Profil = "Siswa Al Irsyad",
+  JadwalPelajaran = "Jadwal Pelajaran",
+  Profil = "Profil Siswa",
   Pengaturan = "Pengaturan",
 }
 
@@ -111,3 +112,12 @@ export interface ReportStudentData {
   hafalan: ReportProgress;
   murojaah: ReportProgress;
 }
+
+// Types for Lesson Schedule
+export interface ScheduleEntry {
+  period: string;
+  time: string;
+  subject: string;
+}
+export type DailySchedule = Record<string, ScheduleEntry>; // Key is className
+export type WeeklySchedule = Record<string, DailySchedule>; // Key is dayName

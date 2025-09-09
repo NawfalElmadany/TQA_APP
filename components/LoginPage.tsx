@@ -1,8 +1,10 @@
+
 import React, { useState } from 'react';
 import { Button, Input } from './FormCard';
 import Icon from './Icon';
 import Logo from './Logo';
-import { authenticateUser } from '../data/dataService';
+// FIX: Import signIn instead of non-existent authenticateUser.
+import { signIn } from '../data/dataService';
 
 interface TeacherLoginPageProps {
   onLogin: () => void;
@@ -27,7 +29,8 @@ const TeacherLoginPage: React.FC<TeacherLoginPageProps> = ({ onLogin, onBack }) 
     return newErrors;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // FIX: Make handleSubmit async to handle promise from signIn.
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
     const validationErrors = validate();
@@ -38,15 +41,15 @@ const TeacherLoginPage: React.FC<TeacherLoginPageProps> = ({ onLogin, onBack }) 
     setErrors({});
     setIsLoading(true);
     
-    // Simulate API call with authentication check
-    setTimeout(() => {
-        if (authenticateUser(email, password)) {
-            onLogin();
-        } else {
-            setLoginError('Email atau password yang Anda masukkan salah.');
-        }
-        setIsLoading(false);
-    }, 1500);
+    // FIX: Use signIn and await the result.
+    const { error } = await signIn(email, password);
+    
+    if (error) {
+        setLoginError('Email atau password yang Anda masukkan salah.');
+    } else {
+        onLogin();
+    }
+    setIsLoading(false);
   };
 
   return (

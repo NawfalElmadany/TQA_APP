@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { getStudentProfileById, updateStudentProfile } from '../data/dataService';
@@ -93,8 +94,9 @@ const StudentProfile: React.FC<StudentProfileProps> = ({ studentId, onBack }) =>
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [studentData, setStudentData] = useState<StudentProfileData | null>(null);
 
-  const fetchStudentData = () => {
-    const data = getStudentProfileById(studentId);
+  // FIX: Make fetchStudentData async to await getStudentProfileById.
+  const fetchStudentData = async () => {
+    const data = await getStudentProfileById(studentId);
     setStudentData(data || null);
   };
 
@@ -111,8 +113,9 @@ const StudentProfile: React.FC<StudentProfileProps> = ({ studentId, onBack }) =>
     );
   }
 
-  const handleSaveProfile = (updatedData: Partial<StudentProfileData>) => {
-    updateStudentProfile(studentId, updatedData);
+  // FIX: Make handleSaveProfile async to await updateStudentProfile.
+  const handleSaveProfile = async (updatedData: Partial<StudentProfileData>) => {
+    await updateStudentProfile(studentId, updatedData);
     fetchStudentData(); // Re-fetch to update UI
     setIsEditModalOpen(false);
   };

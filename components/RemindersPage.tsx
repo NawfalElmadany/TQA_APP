@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { getReminders, addReminder, deleteReminder } from '../data/dataService';
 import { Reminder } from '../types';
@@ -51,17 +52,19 @@ const RemindersPage: React.FC<RemindersPageProps> = ({ onRemindersUpdate }) => {
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [reminderToDelete, setReminderToDelete] = useState<Reminder | null>(null);
 
-  const fetchReminders = () => {
-    setReminders(getReminders());
+  // FIX: Make fetchReminders async to await getReminders.
+  const fetchReminders = async () => {
+    setReminders(await getReminders());
   };
   
   useEffect(() => {
     fetchReminders();
   }, []);
 
-  const handleAddReminder = () => {
+  // FIX: Make handleAddReminder async to await addReminder.
+  const handleAddReminder = async () => {
     if (newReminderContent.trim()) {
-      addReminder(newReminderContent);
+      await addReminder(newReminderContent);
       playNotificationSound();
       setFeedbackMessage('Pengingat berhasil ditambahkan!');
       setNewReminderContent('');
@@ -71,9 +74,10 @@ const RemindersPage: React.FC<RemindersPageProps> = ({ onRemindersUpdate }) => {
     }
   };
   
-  const handleConfirmDelete = () => {
+  // FIX: Make handleConfirmDelete async to await deleteReminder.
+  const handleConfirmDelete = async () => {
     if (reminderToDelete) {
-      deleteReminder(reminderToDelete.id);
+      await deleteReminder(reminderToDelete.id);
       fetchReminders();
       onRemindersUpdate();
       setReminderToDelete(null); // Close modal

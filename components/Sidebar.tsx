@@ -15,7 +15,7 @@ interface SidebarProps {
 
 const NavItem: React.FC<{
   page: Page;
-  iconName: 'dashboard' | 'target' | 'input' | 'laporan' | 'profil' | 'notes' | 'calendar' | 'settings';
+  iconName: 'dashboard' | 'target' | 'input' | 'laporan' | 'profil' | 'notes' | 'calendar' | 'settings' | 'schedule';
   activePage: Page;
   onClick: () => void;
   badgeCount?: number;
@@ -77,6 +77,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, setActivePage, onLogout, 
                 badgeCount={unreadReminderCount}
               />
               <NavItem page={Page.Laporan} iconName="laporan" activePage={activePage} onClick={() => setActivePage(Page.Laporan)} />
+              <NavItem page={Page.JadwalPelajaran} iconName="schedule" activePage={activePage} onClick={() => setActivePage(Page.JadwalPelajaran)} />
               <NavItem page={Page.Profil} iconName="profil" activePage={activePage} onClick={() => setActivePage(Page.Profil)} />
               <NavItem page={Page.Pengaturan} iconName="settings" activePage={activePage} onClick={() => setActivePage(Page.Pengaturan)} />
             </ul>

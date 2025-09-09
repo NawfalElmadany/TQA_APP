@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, Input } from './FormCard';
 import Icon from './Icon';
 import Logo from './Logo';
-import { authenticateUser } from '../data/dataService';
+import { signIn } from '../data/dataService';
 
 interface TeacherLoginPageProps {
   onLogin: () => void;
@@ -27,7 +27,7 @@ const TeacherLoginPage: React.FC<TeacherLoginPageProps> = ({ onLogin, onBack }) 
     return newErrors;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
     const validationErrors = validate();
@@ -38,15 +38,14 @@ const TeacherLoginPage: React.FC<TeacherLoginPageProps> = ({ onLogin, onBack }) 
     setErrors({});
     setIsLoading(true);
     
-    // Simulate API call with authentication check
-    setTimeout(() => {
-        if (authenticateUser(email, password)) {
-            onLogin();
-        } else {
-            setLoginError('Email atau password yang Anda masukkan salah.');
-        }
-        setIsLoading(false);
-    }, 1500);
+    const { error } = await signIn(email, password);
+    
+    if (error) {
+        setLoginError('Email atau password salah. Silakan coba lagi.');
+    } else {
+        onLogin();
+    }
+    setIsLoading(false);
   };
 
   return (

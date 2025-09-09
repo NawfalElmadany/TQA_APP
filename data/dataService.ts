@@ -1,726 +1,576 @@
-import { User, Student, StudentProfileData, TartiliRecord, HafalanRecord, JuzTarget, SurahTarget, HafalanStatus, TeacherProfile, MurojaahRecord, DailyNote, Reminder, ReportStudentData, ReportProgress } from '../types';
-import { STUDENTS_INITIAL_NAMES, JUZ_29_SURAHS, JUZ_30_SURAHS, TARTILI_LEVELS } from '../constants';
 
-const DB_KEY = 'al-irsyad-monitoring-data';
-const TEACHER_PROFILE_KEY = 'al-irsyad-teacher-profile';
-const CUSTOM_LOGO_KEY = 'tqa-app-custom-logo';
+import { supabase } from '../lib/supabaseClient';
+import { User, Student, StudentProfileData, TartiliRecord, HafalanRecord, JuzTarget, SurahTarget, HafalanStatus, TeacherProfile, MurojaahRecord, DailyNote, Reminder, ReportStudentData, ReportProgress, WeeklySchedule, ScheduleEntry } from '../types';
+import { JUZ_29_SURAHS, JUZ_30_SURAHS, TARTILI_LEVELS } from '../constants';
 
-interface AppData {
-  users: User[];
-  students: Student[];
-  profiles: StudentProfileData[];
-  dailyNotes: DailyNote[];
-  reminders: Reminder[];
-}
-
-// --- INITIAL DATA GENERATION ---
-
-const generateHafalanTargets = (progressMultiplier: number): JuzTarget[] => {
-  const generateSurahStatus = (surah: { name: string, totalAyat: number }, multiplier: number): SurahTarget => {
-    const randomFactor = Math.random() * multiplier;
-    let memorizedAyat: number;
-    let status: HafalanStatus;
-
-    if (randomFactor > 0.8) {
-      memorizedAyat = surah.totalAyat;
-      status = 'Selesai';
-    } else if (randomFactor > 0.3) {
-      memorizedAyat = Math.floor(surah.totalAyat * (0.2 + Math.random() * 0.7));
-      status = 'Sedang Proses';
-    } else {
-      memorizedAyat = 0;
-      status = 'Belum Dimulai';
-    }
-    return { ...surah, memorizedAyat, status };
-  };
-
-  return [
-    { juz: 30, surahs: JUZ_30_SURAHS.map(s => generateSurahStatus(s, progressMultiplier)) },
-    { juz: 29, surahs: JUZ_29_SURAHS.map(s => generateSurahStatus(s, progressMultiplier * 0.7)) }
-  ];
-};
-
-const getInitialData = (): AppData => {
-    const students: Student[] = [
-      // Kelas 5C
-      { id: 1, name: "Bilqis", class: "5C" },
-      { id: 2, name: "Attar", class: "5C" },
-      { id: 3, name: "Hagia", class: "5C" },
-      { id: 4, name: "Ina", class: "5C" },
-      { id: 5, name: "Irfan", class: "5C" },
-      { id: 6, name: "Kayla", class: "5C" },
-      { id: 7, name: "Keanu", class: "5C" },
-      { id: 8, name: "Keisha", class: "5C" },
-      { id: 9, name: "Aqila", class: "5C" },
-      { id: 10, name: "Fathan", class: "5C" },
-      // Kelas 5D
-      { id: 11, name: "Geo", class: "5D" },
-      { id: 12, name: "Husain", class: "5D" },
-      { id: 13, name: "Jacinda", class: "5D" },
-      { id: 14, name: "Jadda", class: "5D" },
-      { id: 15, name: "Laviola", class: "5D" },
-      { id: 16, name: "Ahnaf", class: "5D" },
-      { id: 17, name: "Dony", class: "5D" },
-      { id: 18, name: "Radeva", class: "5D" },
-      { id: 19, name: "Nara", class: "5D" },
-      { id: 20, name: "Naura", class: "5D" },
-      { id: 21, name: "Qaisha", class: "5D" },
-      // Kelas 6C
-      { id: 22, name: "Khansa", class: "6C" },
-      { id: 23, name: "Jovita", class: "6C" },
-      { id: 24, name: "Melody Qur'aini", class: "6C" },
-      { id: 25, name: "Abidzar", class: "6C" },
-      { id: 26, name: "Kenzie", class: "6C" },
-      { id: 27, name: "Ulwan", class: "6C" },
-      { id: 28, name: "Nada", class: "6C" },
-      { id: 29, name: "Queen", class: "6C" },
-      { id: 30, name: "Fikri", class: "6C" },
-      // Kelas 6D
-      { id: 31, name: "Dimas", class: "6D" },
-      { id: 32, name: "Dzaky", class: "6D" },
-      { id: 33, name: "Faiza", class: "6D" },
-      { id: 34, name: "Friska", class: "6D" },
-      { id: 35, name: "Alya", class: "6D" },
-      { id: 36, name: "Kevin", class: "6D" },
-      { id: 37, name: "Alif", class: "6D" },
-      { id: 38, name: "Ibad", class: "6D" },
-      { id: 39, name: "Malaeka", class: "6D" },
-      { id: 40, name: "Melody Anandayu", class: "6D" },
-      { id: 41, name: "Tara", class: "6D" },
-    ];
-    
-    const profiles: StudentProfileData[] = students.map(student => ({
-      id: student.id,
-      name: student.name,
-      class: student.class,
-      profilePic: null,
-      joinDate: `2023-0${Math.floor(Math.random() * 9) + 1}-${Math.floor(Math.random() * 28) + 1}`,
-      currentTartiliLevel: `Tartili ${Math.floor(Math.random() * 4) + 1}`,
-      tartiliHistory: [],
-      hafalanHistory: [],
-      murojaahHistory: [],
-      tartiliChartData: [],
-      hafalanChartData: [],
-      murojaahChartData: [],
-      hafalanTargets: generateHafalanTargets(Math.random() * 0.5 + 0.2) // Random progress between 20% and 70%
-    }));
-
-    return { users: [], students, profiles, dailyNotes: [], reminders: [] };
-}
-
-
-// --- LOCALSTORAGE HELPER FUNCTIONS ---
-
-const readDB = (): AppData => {
-  const data = localStorage.getItem(DB_KEY);
-  if (data) {
-    const parsedData = JSON.parse(data);
-    // Ensure properties exist for backward compatibility
-    if (!parsedData.users) parsedData.users = [];
-    if (!parsedData.dailyNotes) parsedData.dailyNotes = [];
-    if (!parsedData.reminders) parsedData.reminders = [];
-    return parsedData;
-  }
-  return getInitialData();
-};
-
-const writeDB = (data: AppData) => {
-  localStorage.setItem(DB_KEY, JSON.stringify(data));
-};
+const BUCKET_NAME = 'app_assets';
 
 // --- AUTHENTICATION ---
-
-export const registerUser = (email: string, password: string): { success: boolean; message: string } => {
-    const db = readDB();
-    const userExists = db.users.find(u => u.email.toLowerCase() === email.toLowerCase());
-
-    if (userExists) {
-        return { success: false, message: 'Email sudah terdaftar. Silakan gunakan email lain.' };
-    }
-
-    db.users.push({ email, password }); // In a real app, hash the password
-    writeDB(db);
-    return { success: true, message: 'Registrasi berhasil!' };
+export const getSession = async () => {
+    const { data } = await supabase.auth.getSession();
+    return data.session;
 };
 
-export const authenticateUser = (email: string, password: string): boolean => {
-    // Allow any non-empty email and password for easy login as requested.
-    return email.trim() !== '' && password.trim() !== '';
+export const signIn = async (email: string, password: string) => {
+    return await supabase.auth.signInWithPassword({ email, password });
+};
+
+export const signOut = async () => {
+    return await supabase.auth.signOut();
+};
+
+// FIX: Add missing registerUser function.
+export const registerUser = async (email: string, password: string): Promise<{ success: boolean; message: string; }> => {
+    const { error } = await supabase.auth.signUp({
+        email,
+        password,
+    });
+    if (error) {
+        return { success: false, message: error.message };
+    }
+    return { success: true, message: 'Registrasi berhasil! Silakan periksa email Anda untuk konfirmasi.' };
+};
+
+const getCurrentUserId = async (): Promise<string | null> => {
+    const session = await getSession();
+    return session?.user?.id || null;
 };
 
 
-// --- PUBLIC API ---
-
-export const initializeDB = () => {
-  if (!localStorage.getItem(DB_KEY)) {
-    console.log('Initializing database with initial data...');
-    writeDB(getInitialData());
-  } else {
-    // Ensure existing DB has all required arrays
-    const db = readDB();
-    let updated = false;
-    if (!db.users) {
-        db.users = [];
-        updated = true;
+// --- CLASSES & STUDENTS ---
+export const getClasses = async (): Promise<string[]> => {
+    const { data, error } = await supabase.from('students').select('class');
+    if (error) {
+        console.error("Error fetching classes:", error);
+        return [];
     }
-    if (!db.dailyNotes) {
-        db.dailyNotes = [];
-        updated = true;
-    }
-    if (!db.reminders) {
-        db.reminders = [];
-        updated = true;
-    }
-    if (updated) writeDB(db);
-  }
-};
-
-export const getClasses = (): string[] => {
-    const students = readDB().students;
-    const uniqueClasses = [...new Set(students.map(s => s.class))];
+    // FIX: Explicitly type the map parameter `s` to ensure TypeScript correctly infers the result as `string[]`, resolving the `unknown[]` error.
+    const uniqueClasses = [...new Set((data || []).map((s: { class: string }) => s.class))];
     return uniqueClasses.sort();
 };
 
-export const getStudents = (className?: string): Student[] => {
-  const allStudents = readDB().students;
-  if (className) {
-      return allStudents.filter(s => s.class === className);
-  }
-  return allStudents;
+export const getStudents = async (className?: string): Promise<Student[]> => {
+    let query = supabase.from('students').select('*');
+    if (className) {
+        query = query.eq('class', className);
+    }
+    const { data, error } = await query.order('name');
+    if (error) {
+        console.error("Error fetching students:", error);
+        return [];
+    }
+    return data;
 };
 
-export const getStudentProfileById = (id: number): StudentProfileData | undefined => {
-  return readDB().profiles.find(p => p.id === id);
-};
+export const getStudentProfileById = async (id: number): Promise<StudentProfileData | null> => {
+    // This function now needs to aggregate data from multiple tables
+    const { data: student, error: studentError } = await supabase.from('students').select('*').eq('id', id).single();
+    if (studentError || !student) {
+        console.error("Error fetching student profile:", studentError);
+        return null;
+    }
 
-export const getAllProfiles = (): StudentProfileData[] => {
-    return readDB().profiles;
-};
+    const [
+        { data: tartiliHistory },
+        { data: hafalanHistory },
+        { data: murojaahHistory },
+        { data: hafalanTargetsRaw }
+    ] = await Promise.all([
+        supabase.from('tartili_history').select('*').eq('student_id', id).order('date', { ascending: false }),
+        supabase.from('hafalan_history').select('*').eq('student_id', id).order('date', { ascending: false }),
+        supabase.from('murojaah_history').select('*').eq('student_id', id).order('date', { ascending: false }),
+        supabase.from('hafalan_targets').select('*').eq('student_id', id)
+    ]);
 
-export const addStudent = (name: string, className: string): Student => {
-    const db = readDB();
-    const newId = (db.students.length > 0 ? Math.max(...db.students.map(s => s.id)) : 0) + 1;
+    const processChartData = (records: {date: string, score: number}[]) => 
+        (records || []).map(r => ({ name: new Date(r.date + 'T00:00:00').toLocaleString('default', { month: 'short' }), score: r.score }));
+
+    const getSurahStatus = (s: { memorized_ayat: number, total_ayat: number }): HafalanStatus => {
+        if (s.memorized_ayat >= s.total_ayat) return 'Selesai';
+        if (s.memorized_ayat > 0) return 'Sedang Proses';
+        return 'Belum Dimulai';
+    }
     
-    const newStudent: Student = {
-        id: newId,
-        name,
-        class: className.toUpperCase().trim()
-    };
-    db.students.push(newStudent);
-    
-    const newProfile: StudentProfileData = {
-        id: newId,
-        name: name,
-        class: className.toUpperCase().trim(),
-        joinDate: new Date().toISOString().split('T')[0],
-        profilePic: null,
-        currentTartiliLevel: TARTILI_LEVELS[0],
-        tartiliHistory: [],
-        hafalanHistory: [],
-        murojaahHistory: [],
-        tartiliChartData: [],
-        hafalanChartData: [],
-        murojaahChartData: [],
-        hafalanTargets: generateHafalanTargets(0.1) // Start with low progress
-    };
-    db.profiles.push(newProfile);
-
-    writeDB(db);
-    return newStudent;
-};
-
-export const deleteStudent = (studentId: number) => {
-    const db = readDB();
-    db.students = db.students.filter(s => s.id !== studentId);
-    db.profiles = db.profiles.filter(p => p.id !== studentId);
-    writeDB(db);
-};
-
-export const updateStudentProfile = (id: number, updatedData: Partial<StudentProfileData>) => {
-    const db = readDB();
-    const profileIndex = db.profiles.findIndex(p => p.id === id);
-    if (profileIndex > -1) {
-        db.profiles[profileIndex] = { ...db.profiles[profileIndex], ...updatedData };
-        
-        // Also update the student's name in the students list if it changed
-        if (updatedData.name) {
-            const studentIndex = db.students.findIndex(s => s.id === id);
-            if (studentIndex > -1) {
-                db.students[studentIndex].name = updatedData.name;
-            }
+    const hafalanTargets: JuzTarget[] = (hafalanTargetsRaw || []).reduce((acc: JuzTarget[], target) => {
+        let juzGroup = acc.find(j => j.juz === target.juz);
+        if (!juzGroup) {
+            juzGroup = { juz: target.juz, surahs: [] };
+            acc.push(juzGroup);
         }
-        
-        writeDB(db);
-    }
-};
+        juzGroup.surahs.push({
+            name: target.surah_name,
+            totalAyat: target.total_ayat,
+            memorizedAyat: target.memorized_ayat,
+            status: getSurahStatus(target)
+        });
+        return acc;
+    }, []);
 
-export const addTartiliRecord = (studentId: number, record: TartiliRecord) => {
-    const db = readDB();
-    const profile = db.profiles.find(p => p.id === studentId);
-    if (profile) {
-        profile.tartiliHistory.unshift(record);
-        profile.currentTartiliLevel = record.level; // Update current level
-        
-        // Update progress chart data
-        profile.tartiliChartData.push({ name: new Date(record.date + 'T00:00:00').toLocaleString('default', { month: 'short' }), score: record.score });
-
-        writeDB(db);
-    }
-};
-
-export const deleteLastTartiliRecord = (studentId: number) => {
-    const db = readDB();
-    const profile = db.profiles.find(p => p.id === studentId);
-    if (profile && profile.tartiliHistory.length > 0) {
-        profile.tartiliHistory.shift();
-        profile.tartiliChartData.pop();
-
-        // Revert currentTartiliLevel to the new latest record, or the default if none exist
-        if (profile.tartiliHistory.length > 0) {
-            profile.currentTartiliLevel = profile.tartiliHistory[0].level;
-        } else {
-            profile.currentTartiliLevel = TARTILI_LEVELS[0];
-        }
-        
-        writeDB(db);
-    }
-};
-
-export const graduateStudentTartili = (studentId: number, passedLevel: string, score: number, notes: string, date: string) => {
-    const db = readDB();
-    const profile = db.profiles.find(p => p.id === studentId);
-    if (profile) {
-        // 1. Add a record for the drill
-        const drillRecord: TartiliRecord = {
-            date: date,
-            level: passedLevel,
-            page: 'Ujian', // Use a descriptive string for drill tests, compatible with new page type.
-            score: score,
-            notes: `LULUS UJIAN DRILL - ${passedLevel}. ${notes || ''}`.trim(),
-        };
-        profile.tartiliHistory.unshift(drillRecord);
-
-        // 2. Update the student's current level
-        const currentLevelIndex = TARTILI_LEVELS.indexOf(passedLevel);
-        if (currentLevelIndex > -1 && currentLevelIndex < TARTILI_LEVELS.length - 1) {
-            // Not the last level, promote to the next one
-            profile.currentTartiliLevel = TARTILI_LEVELS[currentLevelIndex + 1];
-        } else {
-            // Last level passed, set a special status
-            profile.currentTartiliLevel = "Lulus Tartili";
-        }
-        
-        // 3. Add score to chart
-        profile.tartiliChartData.push({ name: new Date(date + 'T00:00:00').toLocaleString('default', { month: 'short' }), score: score });
-
-        writeDB(db);
-    }
-};
-
-// Helper to robustly recalculate a surah's progress from scratch
-const recalculateSurahTarget = (profile: StudentProfileData, surahName: string) => {
-    const surahTarget = profile.hafalanTargets.flatMap(j => j.surahs).find(s => s.name === surahName);
-    if (surahTarget) {
-        // Reset progress
-        surahTarget.memorizedAyat = 0;
-
-        // Recalculate by iterating through all relevant history
-        const relevantHistory = profile.hafalanHistory.filter(r => r.surah === surahName);
-        let totalMemorized = 0;
-        for (const record of relevantHistory) {
-            const [startAyat, endAyat] = record.ayat.split('-').map(Number);
-            const memorizedCount = (endAyat || startAyat) - startAyat + 1;
-            totalMemorized += memorizedCount;
-        }
-        surahTarget.memorizedAyat = totalMemorized;
-
-        // Update status based on recalculated total
-        if (surahTarget.memorizedAyat >= surahTarget.totalAyat) {
-            surahTarget.status = 'Selesai';
-        } else if (surahTarget.memorizedAyat > 0) {
-            surahTarget.status = 'Sedang Proses';
-        } else {
-            surahTarget.status = 'Belum Dimulai';
-        }
-    }
-};
-
-
-export const addHafalanRecord = (studentId: number, record: HafalanRecord) => {
-    const db = readDB();
-    const profile = db.profiles.find(p => p.id === studentId);
-    if (profile) {
-        profile.hafalanHistory.unshift(record);
-
-        // Update progress chart data with hafalan score as well
-        profile.hafalanChartData.push({ name: new Date(record.date + 'T00:00:00').toLocaleString('default', { month: 'short' }), score: record.score });
-        
-        // A simple logic to update hafalan target status
-        const surahTarget = profile.hafalanTargets.flatMap(j => j.surahs).find(s => s.name === record.surah);
-        if (surahTarget) {
-            const [startAyat, endAyat] = record.ayat.split('-').map(Number);
-            const memorizedCount = (endAyat || startAyat) - startAyat + 1;
-            surahTarget.memorizedAyat = Math.min(surahTarget.totalAyat, surahTarget.memorizedAyat + memorizedCount);
-            if(surahTarget.memorizedAyat >= surahTarget.totalAyat) {
-                surahTarget.status = 'Selesai';
-            } else if (surahTarget.memorizedAyat > 0) {
-                surahTarget.status = 'Sedang Proses';
-            }
-        }
-
-        writeDB(db);
-    }
-};
-
-export const deleteLastHafalanRecord = (studentId: number) => {
-    const db = readDB();
-    const profile = db.profiles.find(p => p.id === studentId);
-    if (profile && profile.hafalanHistory.length > 0) {
-        const deletedRecord = profile.hafalanHistory.shift();
-        profile.hafalanChartData.pop();
-
-        if (deletedRecord) {
-            // After deleting the record, recalculate the surah's progress from scratch
-            recalculateSurahTarget(profile, deletedRecord.surah);
-        }
-        
-        writeDB(db);
-    }
-};
-
-
-export const addMurojaahRecord = (studentId: number, record: MurojaahRecord) => {
-    const db = readDB();
-    const profile = db.profiles.find(p => p.id === studentId);
-    if (profile) {
-        if (!profile.murojaahHistory) {
-            profile.murojaahHistory = [];
-        }
-        profile.murojaahHistory.unshift(record);
-
-        // Also add score to chart data
-        if (!profile.murojaahChartData) {
-            profile.murojaahChartData = [];
-        }
-        profile.murojaahChartData.push({ name: new Date(record.date + 'T00:00:00').toLocaleString('default', { month: 'short' }), score: record.score });
-        
-        writeDB(db);
-    }
-};
-
-export const deleteLastMurojaahRecord = (studentId: number) => {
-    const db = readDB();
-    const profile = db.profiles.find(p => p.id === studentId);
-    if (profile && profile.murojaahHistory && profile.murojaahHistory.length > 0) {
-        profile.murojaahHistory.shift();
-        profile.murojaahChartData.pop();
-        writeDB(db);
-    }
-};
-
-
-// --- TEACHER PROFILE ---
-export const getTeacherProfile = (): TeacherProfile => {
-    const data = localStorage.getItem(TEACHER_PROFILE_KEY);
-    if (data) {
-        return JSON.parse(data);
-    }
-    // Default data
     return {
-        name: 'Ustadz',
-        email: 'ustadz@al-irsyad.com',
-        profilePic: null,
+        id: student.id,
+        name: student.name,
+        class: student.class,
+        joinDate: student.join_date,
+        profilePic: student.profile_pic_url,
+        currentTartiliLevel: student.current_tartili_level,
+        tartiliHistory: tartiliHistory || [],
+        hafalanHistory: hafalanHistory || [],
+        murojaahHistory: murojaahHistory || [],
+        tartiliChartData: processChartData(tartiliHistory || []),
+        hafalanChartData: processChartData(hafalanHistory || []),
+        murojaahChartData: processChartData(murojaahHistory || []),
+        hafalanTargets,
     };
 };
 
-export const saveTeacherProfile = (profile: TeacherProfile) => {
-    localStorage.setItem(TEACHER_PROFILE_KEY, JSON.stringify(profile));
-};
-
-// --- REMINDERS ---
-export const getReminders = (): Reminder[] => {
-    const db = readDB();
-    // Sort by date descending (newest first)
-    return (db.reminders || []).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-};
-
-export const addReminder = (content: string): Reminder => {
-    const db = readDB();
-    if (!db.reminders) {
-        db.reminders = [];
+export const getAllProfiles = async (): Promise<StudentProfileData[]> => {
+    const { data: students, error } = await supabase.from('students').select('*').order('name');
+    if (error) {
+        console.error("Error fetching all students for profiles:", error);
+        return [];
     }
-    const newId = (db.reminders.length > 0 ? Math.max(...db.reminders.map(r => r.id)) : 0) + 1;
-    const newReminder: Reminder = {
-        id: newId,
-        content,
-        createdAt: new Date().toISOString(),
+    const profiles = await Promise.all(students.map(s => getStudentProfileById(s.id)));
+    return profiles.filter((p): p is StudentProfileData => p !== null);
+};
+
+export const addStudent = async (name: string, className: string) => {
+    const { data, error } = await supabase.from('students').insert({ 
+        name, 
+        class: className.toUpperCase().trim(),
+        join_date: new Date().toISOString().split('T')[0],
+        current_tartili_level: TARTILI_LEVELS[0]
+    }).select().single();
+
+    if (error) {
+        console.error("Error adding student:", error);
+        return null;
+    }
+    
+    const targetsToInsert = [
+        ...JUZ_30_SURAHS.map(s => ({ student_id: data.id, juz: 30, surah_name: s.name, total_ayat: s.totalAyat, memorized_ayat: 0})),
+        ...JUZ_29_SURAHS.map(s => ({ student_id: data.id, juz: 29, surah_name: s.name, total_ayat: s.totalAyat, memorized_ayat: 0}))
+    ];
+    await supabase.from('hafalan_targets').insert(targetsToInsert);
+
+    return data;
+};
+
+export const deleteStudent = async (studentId: number) => {
+    const { error } = await supabase.from('students').delete().eq('id', studentId);
+    if (error) console.error("Error deleting student:", error);
+};
+
+export const updateStudentProfile = async (id: number, updatedData: Partial<StudentProfileData>) => {
+    const studentUpdate: Partial<Student> & { profile_pic_url?: string | null, join_date?: string } = {};
+    if (updatedData.name) studentUpdate.name = updatedData.name;
+    if (updatedData.profilePic) studentUpdate.profile_pic_url = updatedData.profilePic;
+    if (updatedData.joinDate) studentUpdate.join_date = updatedData.joinDate;
+    
+    const { error } = await supabase.from('students').update(studentUpdate).eq('id', id);
+    if (error) console.error("Error updating student profile:", error);
+};
+
+// --- RECORD MANAGEMENT ---
+export const addTartiliRecord = async (studentId: number, record: TartiliRecord) => {
+    await supabase.from('tartili_history').insert({ student_id: studentId, ...record });
+    await supabase.from('students').update({ current_tartili_level: record.level }).eq('id', studentId);
+};
+
+export const deleteLastTartiliRecord = async (studentId: number) => {
+    const { data: lastRecord } = await supabase.from('tartili_history').select('id').eq('student_id', studentId).order('created_at', { ascending: false }).limit(1).single();
+    if (lastRecord) {
+        await supabase.from('tartili_history').delete().eq('id', lastRecord.id);
+    }
+};
+
+export const graduateStudentTartili = async (studentId: number, passedLevel: string, score: number, notes: string, date: string) => {
+    const drillRecord = {
+        date,
+        level: passedLevel,
+        page: 'Ujian',
+        score,
+        notes: `LULUS UJIAN DRILL - ${passedLevel}. ${notes || ''}`.trim(),
     };
-    db.reminders.push(newReminder);
-    writeDB(db);
-    return newReminder;
-};
-
-export const deleteReminder = (id: number) => {
-    const db = readDB();
-    if (db.reminders) {
-        db.reminders = db.reminders.filter(r => r.id !== id);
-        writeDB(db);
-    }
-};
-
-// --- DAILY NOTES ---
-export const getDailyNotes = (): DailyNote[] => {
-    const db = readDB();
-    // Sort by date descending
-    return (db.dailyNotes || []).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-};
-
-export const saveDailyNote = (date: string, content: string) => {
-    const db = readDB();
-    if (!db.dailyNotes) {
-        db.dailyNotes = [];
-    }
-    const noteIndex = db.dailyNotes.findIndex(n => n.date === date);
+    await addTartiliRecord(studentId, drillRecord);
     
-    if (content.trim() === '') {
-        // If content is empty, delete the note if it exists
-        if (noteIndex > -1) {
-            db.dailyNotes.splice(noteIndex, 1);
-        }
-    } else {
-        if (noteIndex > -1) {
-            // Update existing note
-            db.dailyNotes[noteIndex].content = content;
-        } else {
-            // Add new note
-            db.dailyNotes.push({ date, content });
-        }
+    const currentLevelIndex = TARTILI_LEVELS.indexOf(passedLevel);
+    let newLevel = "Lulus Tartili";
+    if (currentLevelIndex > -1 && currentLevelIndex < TARTILI_LEVELS.length - 1) {
+        newLevel = TARTILI_LEVELS[currentLevelIndex + 1];
     }
-    writeDB(db);
+    await supabase.from('students').update({ current_tartili_level: newLevel }).eq('id', studentId);
 };
 
-export const deleteDailyNote = (date: string) => {
-    const db = readDB();
-    if (db.dailyNotes) {
-        db.dailyNotes = db.dailyNotes.filter(n => n.date !== date);
-        writeDB(db);
-    }
-};
+const recalculateSurahTarget = async (studentId: number, surahName: string) => {
+    const { data: surahTarget, error: targetError } = await supabase.from('hafalan_targets').select('id, total_ayat').eq('student_id', studentId).eq('surah_name', surahName).single();
+    if (targetError || !surahTarget) return;
 
+    const { data: relevantHistory, error: historyError } = await supabase.from('hafalan_history').select('ayat').eq('student_id', studentId).eq('surah', surahName);
+    if (historyError) return;
 
-// --- DYNAMIC DATA FOR DASHBOARD ---
-
-export const getRecentMemorizations = () => {
-    const profiles = getAllProfiles();
-    const recent = [];
-    for (const profile of profiles) {
-        if (profile.hafalanHistory.length > 0) {
-            const latest = profile.hafalanHistory[0];
-            const surahInfo = profile.hafalanTargets.flatMap(j=>j.surahs).find(s => s.name === latest.surah);
-            const progress = surahInfo ? (surahInfo.memorizedAyat / surahInfo.totalAyat) * 100 : 0;
-            recent.push({
-                studentId: profile.id,
-                student: profile.name,
-                surah: latest.surah,
-                progress: Math.round(progress),
-                date: latest.date,
-            });
-        }
-    }
-    return recent.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 3);
-};
-
-
-export const getOverallProgress = () => {
-    const profiles = getAllProfiles();
-    if (profiles.length === 0) return 0;
-    
     let totalMemorized = 0;
-    let totalTarget = 0;
+    const memorizedAyats = new Set<number>();
+    for (const record of relevantHistory) {
+        const [start, end] = record.ayat.split('-').map(Number);
+        const endAyat = end || start;
+        for (let i = start; i <= endAyat; i++) {
+            memorizedAyats.add(i);
+        }
+    }
+    totalMemorized = memorizedAyats.size;
 
-    for (const profile of profiles) {
-        profile.hafalanTargets.forEach(juz => {
-            juz.surahs.forEach(surah => {
-                totalMemorized += surah.memorizedAyat;
-                totalTarget += surah.totalAyat;
-            });
-        });
+    await supabase.from('hafalan_targets').update({ memorized_ayat: totalMemorized }).eq('id', surahTarget.id);
+};
+
+export const addHafalanRecord = async (studentId: number, record: HafalanRecord) => {
+    await supabase.from('hafalan_history').insert({ student_id: studentId, ...record });
+    await recalculateSurahTarget(studentId, record.surah);
+};
+
+export const deleteLastHafalanRecord = async (studentId: number) => {
+    const { data: lastRecord } = await supabase.from('hafalan_history').select('id, surah').eq('student_id', studentId).order('created_at', { ascending: false }).limit(1).single();
+    if (lastRecord) {
+        await supabase.from('hafalan_history').delete().eq('id', lastRecord.id);
+        await recalculateSurahTarget(studentId, lastRecord.surah);
+    }
+};
+
+export const addMurojaahRecord = async (studentId: number, record: MurojaahRecord) => {
+    await supabase.from('murojaah_history').insert({ student_id: studentId, ...record });
+};
+
+export const deleteLastMurojaahRecord = async (studentId: number) => {
+    const { data: lastRecord } = await supabase.from('murojaah_history').select('id').eq('student_id', studentId).order('created_at', { ascending: false }).limit(1).single();
+    if (lastRecord) {
+        await supabase.from('murojaah_history').delete().eq('id', lastRecord.id);
+    }
+};
+
+// --- DASHBOARD DATA ---
+export const getRecentMemorizations = async () => {
+    const { data, error } = await supabase
+        .from('hafalan_history')
+        .select('student_id, surah, date, students(name), hafalan_targets(total_ayat, memorized_ayat, surah_name)')
+        .order('date', { ascending: false })
+        .limit(20);
+
+    if (error) {
+        console.error("Error getting recent memorizations:", error);
+        return [];
     }
 
-    return totalTarget > 0 ? Math.round((totalMemorized / totalTarget) * 100) : 0;
+    const uniqueStudents = Array.from(new Set(data.map(item => item.student_id)))
+        .map(id => data.find(item => item.student_id === id))
+        .slice(0, 6);
+
+    return uniqueStudents.map(item => {
+        if (!item || !item.students || !item.hafalan_targets) return null;
+        const target = (item.hafalan_targets as any[]).find(t => t.surah_name === item.surah);
+        const progress = target ? (target.memorized_ayat / target.total_ayat) * 100 : 0;
+        return {
+            studentId: item.student_id,
+            student: item.students.name,
+            surah: item.surah,
+            progress: progress,
+        };
+    }).filter(Boolean);
 };
 
 
-export const getDashboardChartData = () => {
-    const profiles = getAllProfiles();
-    const monthlyData: Record<string, {
-        tartiliTotal: number; tartiliCount: number;
-        hafalanTotal: number; hafalanCount: number;
-        murojaahTotal: number; murojaahCount: number;
-    }> = {};
+export const getOverallProgress = async (): Promise<number> => {
+    const { data, error } = await supabase.from('hafalan_targets').select('total_ayat, memorized_ayat');
+    if (error) {
+        console.error("Error getting overall progress:", error);
+        return 0;
+    }
+    const totalAyat = data.reduce((sum, s) => sum + s.total_ayat, 0);
+    const memorizedAyat = data.reduce((sum, s) => sum + s.memorized_ayat, 0);
+    return totalAyat > 0 ? (memorizedAyat / totalAyat) * 100 : 0;
+};
 
-    const processData = (chartData: { name: string; score: number }[], type: 'tartili' | 'hafalan' | 'murojaah') => {
-        chartData.forEach(record => {
-            if (!monthlyData[record.name]) {
-                monthlyData[record.name] = {
-                    tartiliTotal: 0, tartiliCount: 0,
-                    hafalanTotal: 0, hafalanCount: 0,
-                    murojaahTotal: 0, murojaahCount: 0,
-                };
-            }
-            if (type === 'tartili') {
-                monthlyData[record.name].tartiliTotal += record.score;
-                monthlyData[record.name].tartiliCount++;
-            } else if (type === 'hafalan') {
-                monthlyData[record.name].hafalanTotal += record.score;
-                monthlyData[record.name].hafalanCount++;
-            } else { // murojaah
-                monthlyData[record.name].murojaahTotal += record.score;
-                monthlyData[record.name].murojaahCount++;
-            }
-        });
+export const getDashboardChartData = async () => {
+    // This is a complex aggregation, often better done with a database function (RPC in Supabase).
+    // The simplified version below fetches recent data and processes it client-side.
+    const threeMonthsAgo = new Date();
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+    const dateThreshold = threeMonthsAgo.toISOString().split('T')[0];
+
+    const [
+        { data: tartiliData },
+        { data: hafalanData },
+        { data: murojaahData }
+    ] = await Promise.all([
+        supabase.from('tartili_history').select('date, score').gte('date', dateThreshold),
+        supabase.from('hafalan_history').select('date, score').gte('date', dateThreshold),
+        supabase.from('murojaah_history').select('date, score').gte('date', dateThreshold)
+    ]);
+
+    const aggregateByMonth = (records: {date: string, score: number}[] | null) => {
+        if (!records) return {};
+        return records.reduce((acc, record) => {
+            const month = new Date(record.date + 'T00:00:00').toLocaleString('default', { month: 'short' });
+            if (!acc[month]) acc[month] = { total: 0, count: 0 };
+            acc[month].total += record.score;
+            acc[month].count++;
+            return acc;
+        }, {} as Record<string, { total: number, count: number }>);
     };
 
-    profiles.forEach(p => {
-        processData(p.tartiliChartData || [], 'tartili');
-        processData(p.hafalanChartData || [], 'hafalan');
-        processData(p.murojaahChartData || [], 'murojaah');
-    });
+    const tartiliAvg = aggregateByMonth(tartiliData);
+    const hafalanAvg = aggregateByMonth(hafalanData);
+    const murojaahAvg = aggregateByMonth(murojaahData);
 
-    return Object.entries(monthlyData).map(([name, data]) => ({
-        name,
-        tartiliScore: data.tartiliCount > 0 ? Math.round(data.tartiliTotal / data.tartiliCount) : null,
-        hafalanScore: data.hafalanCount > 0 ? Math.round(data.hafalanTotal / data.hafalanCount) : null,
-        murojaahScore: data.murojaahCount > 0 ? Math.round(data.murojaahTotal / data.murojaahCount) : null,
+    const allMonths = [...new Set([...Object.keys(tartiliAvg), ...Object.keys(hafalanAvg), ...Object.keys(murojaahAvg)])];
+    
+    return allMonths.map(month => ({
+        name: month,
+        tartiliScore: tartiliAvg[month] ? Math.round(tartiliAvg[month].total / tartiliAvg[month].count) : null,
+        hafalanScore: hafalanAvg[month] ? Math.round(hafalanAvg[month].total / hafalanAvg[month].count) : null,
+        murojaahScore: murojaahAvg[month] ? Math.round(murojaahAvg[month].total / murojaahAvg[month].count) : null,
     }));
 };
 
-// --- REPORTING DATA ---
+// --- TEACHER PROFILE ---
+export const getTeacherProfile = async (): Promise<TeacherProfile | null> => {
+    const userId = await getCurrentUserId();
+    if (!userId) return null;
 
-export const getReportDataForClass = (className: string, startDate: string, endDate: string): ReportStudentData[] => {
-  const db = readDB();
-  const studentProfiles = db.profiles.filter(p => p.class === className);
-  
-  const start = new Date(startDate + 'T00:00:00');
-  const end = new Date(endDate + 'T23:59:59');
-
-  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-    return []; // Invalid date range
-  }
-
-  const reportData = studentProfiles.map(profile => {
-    const filterAndSortByDate = <T extends { date: string }>(records: T[]): T[] => {
-        return (records || [])
-          .filter(r => {
-            const recordDate = new Date(r.date + 'T00:00:00');
-            return recordDate >= start && recordDate <= end;
-          })
-          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()); // Sort ascending
-    };
-
-    // --- Tartili ---
-    const tartiliRecords = filterAndSortByDate(profile.tartiliHistory);
-    let tartili: ReportProgress = { awal: 'N/A', akhir: 'N/A' };
-    if (tartiliRecords.length > 0) {
-        const first = tartiliRecords[0];
-        const last = tartiliRecords[tartiliRecords.length - 1];
-        tartili.awal = `${first.level}, Hal. ${first.page}`;
-        tartili.akhir = `${last.level}, Hal. ${last.page}`;
+    const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
+    if (error) {
+        console.error("Error fetching teacher profile:", error);
+        return null;
     }
-
-    // --- Hafalan ---
-    const hafalanRecords = filterAndSortByDate(profile.hafalanHistory);
-    let hafalan: ReportProgress = { awal: 'N/A', akhir: 'N/A' };
-    if (hafalanRecords.length > 0) {
-        const first = hafalanRecords[0];
-        const last = hafalanRecords[hafalanRecords.length - 1];
-        hafalan.awal = `${first.surah} ${first.ayat}`;
-        hafalan.akhir = `${last.surah} ${last.ayat}`;
-    }
-
-    // --- Murojaah ---
-    const murojaahRecords = filterAndSortByDate(profile.murojaahHistory);
-    let murojaah: ReportProgress = { awal: 'N/A', akhir: 'N/A' };
-     if (murojaahRecords.length > 0) {
-        const first = murojaahRecords[0];
-        const last = murojaahRecords[murojaahRecords.length - 1];
-        murojaah.awal = `${first.surah}`;
-        murojaah.akhir = `${last.surah}`;
-    }
-
     return {
-        id: profile.id,
+        name: data.name,
+        email: data.email,
+        profilePic: data.profile_pic_url
+    };
+};
+
+export const saveTeacherProfile = async (profile: TeacherProfile) => {
+    const userId = await getCurrentUserId();
+    if (!userId) return;
+
+    await supabase.from('profiles').update({
         name: profile.name,
-        tartili,
-        hafalan,
-        murojaah,
-    };
-  });
-
-  return reportData.sort((a,b) => a.name.localeCompare(b.name));
+        email: profile.email,
+        profile_pic_url: profile.profilePic
+    }).eq('id', userId);
 };
 
-// --- DATA MANAGEMENT ---
+// --- REPORTING ---
+export const getReportDataForClass = async (className: string, startDate: string, endDate: string): Promise<ReportStudentData[]> => {
+    const students = await getStudents(className);
+    if (!students || students.length === 0) return [];
 
-// --- CUSTOM LOGO ---
-export const getCustomLogo = (): string | null => {
-    return localStorage.getItem(CUSTOM_LOGO_KEY);
+    const reportData = await Promise.all(students.map(async (student) => {
+        const [
+            { data: tartiliHistory },
+            { data: hafalanHistory },
+            { data: murojaahHistory }
+        ] = await Promise.all([
+            supabase.from('tartili_history').select('date, level, page').eq('student_id', student.id).lte('date', endDate).order('date'),
+            supabase.from('hafalan_history').select('date, surah, ayat').eq('student_id', student.id).lte('date', endDate).order('date'),
+            supabase.from('murojaah_history').select('date, surah').eq('student_id', student.id).lte('date', endDate).order('date')
+        ]);
+        
+        const findProgress = (history: any[] | null, date: string, fields: string[]) => {
+            if (!history) return ' - ';
+            const record = history.filter(h => h.date < date).pop();
+            return record ? fields.map(f => record[f]).join(' ') : ' - ';
+        };
+        
+        const findLastProgress = (history: any[] | null, fields: string[]) => {
+            if (!history || history.length === 0) return ' - ';
+            const record = history[history.length - 1];
+            return record ? fields.map(f => record[f]).join(' ') : ' - ';
+        }
+
+        return {
+            id: student.id,
+            name: student.name,
+            tartili: { awal: findProgress(tartiliHistory, startDate, ['level', 'page']), akhir: findLastProgress(tartiliHistory, ['level', 'page']) },
+            hafalan: { awal: findProgress(hafalanHistory, startDate, ['surah', 'ayat']), akhir: findLastProgress(hafalanHistory, ['surah', 'ayat']) },
+            murojaah: { awal: findProgress(murojaahHistory, startDate, ['surah']), akhir: findLastProgress(murojaahHistory, ['surah']) },
+        };
+    }));
+
+    return reportData;
 };
 
-export const saveCustomLogo = (logoDataUrl: string) => {
-    localStorage.setItem(CUSTOM_LOGO_KEY, logoDataUrl);
+// --- DAILY NOTES & REMINDERS ---
+export const getDailyNotes = async (): Promise<DailyNote[]> => {
+    const userId = await getCurrentUserId();
+    if (!userId) return [];
+    const { data, error } = await supabase.from('daily_notes').select('date, content').eq('user_id', userId).order('date', { ascending: false });
+    return error ? [] : data;
 };
 
-export const deleteCustomLogo = () => {
-    localStorage.removeItem(CUSTOM_LOGO_KEY);
+export const saveDailyNote = async (date: string, content: string) => {
+    const userId = await getCurrentUserId();
+    if (!userId) return;
+    await supabase.from('daily_notes').upsert({ user_id: userId, date, content }, { onConflict: 'user_id, date' });
 };
 
+export const deleteDailyNote = async (date: string) => {
+    const userId = await getCurrentUserId();
+    if (!userId) return;
+    await supabase.from('daily_notes').delete().match({ user_id: userId, date });
+};
 
-export const exportAllData = (): { success: boolean, message?: string, data?: string } => {
-  try {
-    const mainDataString = localStorage.getItem(DB_KEY);
-    const teacherProfileString = localStorage.getItem(TEACHER_PROFILE_KEY);
+export const getReminders = async (): Promise<Reminder[]> => {
+    const userId = await getCurrentUserId();
+    if (!userId) return [];
+    const { data, error } = await supabase.from('reminders').select('*').eq('user_id', userId).order('created_at', { ascending: false });
+    return error ? [] : data;
+};
 
-    if (!mainDataString) {
-      return { success: false, message: 'Tidak ada data utama untuk diekspor.' };
+export const getRemindersCount = async (): Promise<{ totalCount: number, unreadCount: number }> => {
+    const reminders = await getReminders();
+    return { totalCount: reminders.length, unreadCount: reminders.length };
+};
+
+export const addReminder = async (content: string) => {
+    const userId = await getCurrentUserId();
+    if (!userId) return;
+    await supabase.from('reminders').insert({ user_id: userId, content });
+};
+
+export const deleteReminder = async (id: number) => {
+    await supabase.from('reminders').delete().eq('id', id);
+};
+
+// --- SCHEDULE ---
+export const getSchedule = async (): Promise<WeeklySchedule> => {
+    const { data, error } = await supabase.from('schedules').select('*');
+    if (error) {
+        console.error("Error fetching schedule:", error);
+        return {};
+    }
+    const weeklySchedule: WeeklySchedule = {};
+    for (const entry of data) {
+        if (!weeklySchedule[entry.day_of_week]) {
+            weeklySchedule[entry.day_of_week] = {};
+        }
+        weeklySchedule[entry.day_of_week][entry.class_name] = {
+            period: entry.period,
+            time: entry.time,
+            subject: entry.subject
+        };
+    }
+    return weeklySchedule;
+};
+
+export const updateSchedule = async (day: string, className: string, newEntry: ScheduleEntry) => {
+    await supabase.from('schedules').update({
+        period: newEntry.period,
+        time: newEntry.time,
+        subject: newEntry.subject
+    }).match({ day_of_week: day, class_name: className });
+};
+
+// --- SETTINGS & PERSONALIZATION ---
+export const saveCustomLogo = async (file: File): Promise<string | null> => {
+    const fileName = `public/logo-${Date.now()}`;
+    const { data: uploadData, error: uploadError } = await supabase.storage
+        .from(BUCKET_NAME)
+        .upload(fileName, file, { cacheControl: '3600', upsert: true });
+
+    if (uploadError) {
+        console.error("Error uploading logo:", uploadError);
+        return null;
     }
 
-    const exportObject = {
-      db: JSON.parse(mainDataString),
-      profile: teacherProfileString ? JSON.parse(teacherProfileString) : getTeacherProfile(),
-      logo: getCustomLogo(),
-    };
+    const { data: urlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(uploadData.path);
+    const publicUrl = urlData.publicUrl;
 
-    const jsonString = JSON.stringify(exportObject, null, 2);
-    return { success: true, data: jsonString };
-  } catch (error) {
-    console.error("Error exporting data:", error);
-    return { success: false, message: 'Gagal mengekspor data.' };
-  }
+    await supabase.from('settings').upsert({ key: 'custom_logo_url', value: publicUrl });
+
+    return publicUrl;
 };
 
-export const importAllData = (jsonString: string): { success: boolean, message: string } => {
-  try {
-    const data = JSON.parse(jsonString);
+export const deleteCustomLogo = async () => {
+    const { data } = await supabase.from('settings').select('value').eq('key', 'custom_logo_url').single();
 
-    // Basic validation
-    if (!data.db || !data.db.students || !data.db.profiles || !data.profile || !data.profile.name) {
-      throw new Error("Struktur file tidak valid.");
+    if (data && data.value) {
+        const filePath = data.value.substring(data.value.lastIndexOf('/') + 1);
+        if (filePath) {
+            await supabase.storage.from(BUCKET_NAME).remove([`public/${filePath}`]);
+        }
     }
-
-    localStorage.setItem(DB_KEY, JSON.stringify(data.db));
-    localStorage.setItem(TEACHER_PROFILE_KEY, JSON.stringify(data.profile));
     
-    if (data.logo) {
-      saveCustomLogo(data.logo);
-    } else {
-      deleteCustomLogo();
-    }
+    await supabase.from('settings').delete().eq('key', 'custom_logo_url');
+};
 
-    return { success: true, message: 'Data berhasil diimpor! Aplikasi akan dimuat ulang.' };
-  } catch (error) {
-    console.error("Error importing data:", error);
-    const errorMessage = error instanceof Error ? error.message : 'File JSON tidak valid atau rusak.';
-    return { success: false, message: `Gagal mengimpor data: ${errorMessage}` };
-  }
+export const getCustomLogo = async (): Promise<string | null> => {
+    const { data, error } = await supabase.from('settings').select('value').eq('key', 'custom_logo_url').single();
+    if (error || !data) {
+        return null;
+    }
+    return data.value;
+};
+
+// --- DATA MANAGEMENT (IMPORT/EXPORT) ---
+export const exportAllData = async (): Promise<{ success: boolean, message: string, data?: string }> => {
+    try {
+        const tables = [
+            'students', 'tartili_history', 'hafalan_history', 'murojaah_history', 
+            'hafalan_targets', 'daily_notes', 'reminders', 'schedules', 'settings', 'profiles'
+        ];
+        
+        const exportedData: { [key: string]: any[] } = {};
+
+        for (const table of tables) {
+            const { data, error } = await supabase.from(table).select('*');
+            if (error) throw new Error(`Error exporting ${table}: ${error.message}`);
+            exportedData[table] = data || [];
+        }
+
+        return { success: true, message: 'Export successful!', data: JSON.stringify(exportedData, null, 2) };
+    } catch (e) {
+        const err = e as Error;
+        console.error("Export error:", err);
+        return { success: false, message: `Export failed: ${err.message}` };
+    }
+};
+
+export const importAllData = async (jsonString: string): Promise<{ success: boolean, message: string }> => {
+    try {
+        const dataToImport = JSON.parse(jsonString);
+
+        // Clear data, respecting foreign key constraints by deleting children first.
+        await supabase.from('tartili_history').delete().gt('id', -1);
+        await supabase.from('hafalan_history').delete().gt('id', -1);
+        await supabase.from('murojaah_history').delete().gt('id',-1);
+        await supabase.from('hafalan_targets').delete().gt('id',-1);
+        await supabase.from('students').delete().gt('id', -1);
+        
+        const userId = await getCurrentUserId();
+        if (userId) {
+            await supabase.from('daily_notes').delete().eq('user_id', userId);
+            await supabase.from('reminders').delete().eq('user_id', userId);
+        }
+
+        await supabase.from('schedules').delete().gt('id', -1);
+        await supabase.from('settings').delete().neq('key', 'a-non-existent-key');
+        
+        // Insert data, parents first.
+        if (dataToImport.students) await supabase.from('students').insert(dataToImport.students);
+        if (dataToImport.tartili_history) await supabase.from('tartili_history').insert(dataToImport.tartili_history);
+        if (dataToImport.hafalan_history) await supabase.from('hafalan_history').insert(dataToImport.hafalan_history);
+        if (dataToImport.murojaah_history) await supabase.from('murojaah_history').insert(dataToImport.murojaah_history);
+        if (dataToImport.hafalan_targets) await supabase.from('hafalan_targets').insert(dataToImport.hafalan_targets);
+        if (dataToImport.daily_notes) await supabase.from('daily_notes').insert(dataToImport.daily_notes);
+        if (dataToImport.reminders) await supabase.from('reminders').insert(dataToImport.reminders);
+        if (dataToImport.schedules) await supabase.from('schedules').insert(dataToImport.schedules);
+        
+        if (dataToImport.settings) await supabase.from('settings').upsert(dataToImport.settings);
+        if (dataToImport.profiles) await supabase.from('profiles').upsert(dataToImport.profiles);
+
+        return { success: true, message: 'Data berhasil diimpor! Aplikasi akan dimuat ulang.' };
+    } catch (e) {
+        const err = e as Error;
+        console.error("Import error:", err);
+        return { success: false, message: `Import failed: ${err.message}` };
+    }
 };

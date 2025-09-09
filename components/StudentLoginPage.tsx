@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button, Select, FormGroup } from './FormCard';
 import Icon from './Icon';
@@ -16,16 +17,21 @@ const StudentLoginPage: React.FC<StudentLoginPageProps> = ({ onLogin, onBack }) 
   const [selectedClass, setSelectedClass] = useState('');
   const [selectedStudentId, setSelectedStudentId] = useState('');
   
+  // FIX: Fetch classes asynchronously.
   useEffect(() => {
-    setClasses(getClasses());
+    const fetchClasses = async () => {
+        setClasses(await getClasses());
+    };
+    fetchClasses();
   }, []);
 
-  const handleClassChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  // FIX: Make handleClassChange async to await getStudents.
+  const handleClassChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newClass = e.target.value;
     setSelectedClass(newClass);
     setSelectedStudentId('');
     if (newClass) {
-        setStudents(getStudents(newClass));
+        setStudents(await getStudents(newClass));
     } else {
         setStudents([]);
     }

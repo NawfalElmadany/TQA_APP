@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { getStudents, getStudentProfileById, updateStudentProfile, deleteStudent, addStudent, getAllProfiles } from '../data/dataService';
 import { Student, StudentProfileData } from '../types';
@@ -47,9 +48,10 @@ const ProfilPage: React.FC<ProfilPageProps> = ({ onSelectStudent }) => {
   const [studentToEdit, setStudentToEdit] = useState<StudentProfileData | null>(null);
   const [studentToDelete, setStudentToDelete] = useState<Student | null>(null);
 
-  const fetchStudents = () => {
-    const students = getStudents();
-    const profiles = getAllProfiles();
+  // FIX: Make fetchStudents async to await data fetching.
+  const fetchStudents = async () => {
+    const students = await getStudents();
+    const profiles = await getAllProfiles();
 
     const combinedData = students.map(student => {
         const profile = profiles.find(p => p.id === student.id);
@@ -84,31 +86,35 @@ const ProfilPage: React.FC<ProfilPageProps> = ({ onSelectStudent }) => {
     setExpandedClass(prev => (prev === className ? null : className));
   };
   
-  const handleOpenEditModal = (student: Student) => {
-    const profileData = getStudentProfileById(student.id);
+  // FIX: Make handleOpenEditModal async to await getStudentProfileById.
+  const handleOpenEditModal = async (student: Student) => {
+    const profileData = await getStudentProfileById(student.id);
     if (profileData) {
       setStudentToEdit(profileData);
     }
   };
 
-  const handleSaveStudent = (updatedData: Partial<StudentProfileData>) => {
+  // FIX: Make handleSaveStudent async to await updateStudentProfile.
+  const handleSaveStudent = async (updatedData: Partial<StudentProfileData>) => {
     if (studentToEdit) {
-      updateStudentProfile(studentToEdit.id, updatedData);
+      await updateStudentProfile(studentToEdit.id, updatedData);
       setStudentToEdit(null);
       fetchStudents();
     }
   };
 
-  const handleConfirmDelete = () => {
+  // FIX: Make handleConfirmDelete async to await deleteStudent.
+  const handleConfirmDelete = async () => {
     if (studentToDelete) {
-      deleteStudent(studentToDelete.id);
+      await deleteStudent(studentToDelete.id);
       setStudentToDelete(null);
       fetchStudents();
     }
   };
 
-  const handleAddStudent = (name: string, className: string) => {
-    addStudent(name, className);
+  // FIX: Make handleAddStudent async to await addStudent.
+  const handleAddStudent = async (name: string, className: string) => {
+    await addStudent(name, className);
     setIsAddModalOpen(false);
     fetchStudents();
   };
@@ -117,7 +123,7 @@ const ProfilPage: React.FC<ProfilPageProps> = ({ onSelectStudent }) => {
     <>
       <div className="animate-fade-in space-y-8">
         <div className="flex justify-between items-center pb-5 border-b border-border dark:border-dark-border">
-          <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-50">Siswa Al Irsyad</h2>
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-50">Profil Siswa</h2>
           <button
             onClick={() => setIsAddModalOpen(true)}
             className="flex items-center gap-2 bg-brand-accent text-white font-bold py-2 px-4 rounded-lg hover:bg-brand-accent-darker transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-brand-accent/30"

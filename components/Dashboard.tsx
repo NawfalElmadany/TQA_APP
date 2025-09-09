@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { getRecentMemorizations, getOverallProgress, getDashboardChartData, getTeacherProfile, saveTeacherProfile } from '../data/dataService';
@@ -86,15 +87,20 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectStudent }) => {
   const [teacherProfile, setTeacherProfile] = useState<TeacherProfile | null>(null);
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
 
+  // FIX: Use an async function inside useEffect to fetch data and await the results.
   useEffect(() => {
-    setRecentMemorizations(getRecentMemorizations());
-    setOverallProgress(getOverallProgress());
-    setChartData(getDashboardChartData());
-    setTeacherProfile(getTeacherProfile());
+    const fetchData = async () => {
+      setRecentMemorizations(await getRecentMemorizations());
+      setOverallProgress(await getOverallProgress());
+      setChartData(await getDashboardChartData());
+      setTeacherProfile(await getTeacherProfile());
+    };
+    fetchData();
   }, []);
 
-  const handleSaveProfile = (updatedProfile: TeacherProfile) => {
-    saveTeacherProfile(updatedProfile);
+  // FIX: Make handleSaveProfile async to await saveTeacherProfile.
+  const handleSaveProfile = async (updatedProfile: TeacherProfile) => {
+    await saveTeacherProfile(updatedProfile);
     setTeacherProfile(updatedProfile);
     setIsEditProfileModalOpen(false);
   };

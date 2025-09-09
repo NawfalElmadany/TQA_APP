@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button, Input, SuccessMessage } from './FormCard';
 import Icon from './Icon';
@@ -37,7 +38,8 @@ const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigateToLogin }
     return newErrors;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // FIX: Make handleSubmit async to await registerUser.
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setApiError('');
     setSuccessMessage('');
@@ -49,18 +51,16 @@ const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigateToLogin }
     setErrors({});
     setIsLoading(true);
 
-    setTimeout(() => {
-      const result = registerUser(email, password);
-      if (result.success) {
-        setSuccessMessage('Registrasi berhasil! Anda akan dialihkan ke halaman login.');
-        setTimeout(() => {
-          onNavigateToLogin();
-        }, 2000);
-      } else {
-        setApiError(result.message);
-      }
-      setIsLoading(false);
-    }, 1500);
+    const result = await registerUser(email, password);
+    if (result.success) {
+      setSuccessMessage('Registrasi berhasil! Anda akan dialihkan ke halaman login.');
+      setTimeout(() => {
+        onNavigateToLogin();
+      }, 2000);
+    } else {
+      setApiError(result.message);
+    }
+    setIsLoading(false);
   };
 
   return (

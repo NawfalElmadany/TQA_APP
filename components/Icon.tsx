@@ -3,7 +3,7 @@
 import React from 'react';
 
 interface IconProps {
-  name: 'dashboard' | 'tartili' | 'hafalan' | 'laporan' | 'profil' | 'email' | 'lock' | 'spinner' | 'logout' | 'target' | 'input' | 'camera' | 'edit' | 'microphone' | 'plus' | 'trash' | 'notes' | 'calendar' | 'bookmark' | 'settings' | 'download' | 'upload';
+  name: 'dashboard' | 'tartili' | 'hafalan' | 'laporan' | 'profil' | 'email' | 'lock' | 'spinner' | 'logout' | 'target' | 'input' | 'camera' | 'edit' | 'microphone' | 'plus' | 'trash' | 'notes' | 'calendar' | 'bookmark' | 'settings' | 'download' | 'upload' | 'schedule';
   className?: string;
 }
 
@@ -124,6 +124,11 @@ const Icon: React.FC<IconProps> = ({ name, className = 'w-6 h-6' }) => {
     upload: (
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+      </svg>
+    ),
+    schedule: (
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
       </svg>
     ),
   };

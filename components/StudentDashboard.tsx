@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { getStudentProfileById, updateStudentProfile } from '../data/dataService';
 import { StudentProfileData, HafalanStatus, SurahTarget } from '../types';
@@ -92,8 +93,9 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ studentId, onLogout
   const [studentData, setStudentData] = useState<StudentProfileData | null>(null);
   const [isProfilePicModalOpen, setIsProfilePicModalOpen] = useState(false);
 
-  const fetchStudentData = () => {
-    const data = getStudentProfileById(studentId);
+  // FIX: Make fetchStudentData async to await getStudentProfileById.
+  const fetchStudentData = async () => {
+    const data = await getStudentProfileById(studentId);
     setStudentData(data || null);
   };
 
@@ -101,8 +103,9 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ studentId, onLogout
     fetchStudentData();
   }, [studentId]);
 
-  const handleSaveProfilePic = (imageDataUrl: string) => {
-    updateStudentProfile(studentId, { profilePic: imageDataUrl });
+  // FIX: Make handleSaveProfilePic async to await updateStudentProfile.
+  const handleSaveProfilePic = async (imageDataUrl: string) => {
+    await updateStudentProfile(studentId, { profilePic: imageDataUrl });
     fetchStudentData(); // Re-fetch to update UI
     setIsProfilePicModalOpen(false);
   };

@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { exportAllData, importAllData, saveCustomLogo, deleteCustomLogo, getCustomLogo } from '../data/dataService';
 import { Button, ErrorMessage, SuccessMessage } from './FormCard';
@@ -19,8 +20,12 @@ const PengaturanPage: React.FC = () => {
   const logoFileInputRef = useRef<HTMLInputElement>(null);
   const [currentLogo, setCurrentLogo] = useState<string | null>(null);
 
+  // FIX: Fetch logo asynchronously.
   useEffect(() => {
-    setCurrentLogo(getCustomLogo());
+    const fetchLogo = async () => {
+        setCurrentLogo(await getCustomLogo());
+    };
+    fetchLogo();
   }, []);
 
   const showFeedback = (message: string, type: 'success' | 'error' = 'success') => {
@@ -28,8 +33,9 @@ const PengaturanPage: React.FC = () => {
     setTimeout(() => setFeedback(null), 5000);
   };
 
-  const handleExport = () => {
-    const result = exportAllData();
+  // FIX: Make handleExport async to await exportAllData.
+  const handleExport = async () => {
+    const result = await exportAllData();
     if (result.success && result.data) {
       const blob = new Blob([result.data], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -63,10 +69,11 @@ const PengaturanPage: React.FC = () => {
     if (!importFile) return;
     
     const reader = new FileReader();
-    reader.onload = (e) => {
+    // FIX: Make onload handler async to await importAllData.
+    reader.onload = async (e) => {
       const content = e.target?.result;
       if (typeof content === 'string') {
-        const result = importAllData(content);
+        const result = await importAllData(content);
         if (result.success) {
           showFeedback(result.message);
           setTimeout(() => window.location.reload(), 2000);
@@ -84,23 +91,24 @@ const PengaturanPage: React.FC = () => {
     setImportFile(null);
   };
 
-  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  // FIX: Make handleLogoUpload async and pass the File object to saveCustomLogo.
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        saveCustomLogo(result);
-        setCurrentLogo(result);
+      const url = await saveCustomLogo(file);
+      if (url) {
+        setCurrentLogo(url);
         window.dispatchEvent(new Event('logoUpdated'));
         showFeedback('Logo berhasil diperbarui!');
-      };
-      reader.readAsDataURL(file);
+      } else {
+        showFeedback('Gagal mengunggah logo.', 'error');
+      }
     }
   };
 
-  const handleRemoveLogo = () => {
-    deleteCustomLogo();
+  // FIX: Make handleRemoveLogo async to await deleteCustomLogo.
+  const handleRemoveLogo = async () => {
+    await deleteCustomLogo();
     setCurrentLogo(null);
     window.dispatchEvent(new Event('logoUpdated'));
     showFeedback('Logo kustom telah dihapus.');

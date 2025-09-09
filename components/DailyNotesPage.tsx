@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { getDailyNotes, saveDailyNote, deleteDailyNote } from '../data/dataService';
 import { DailyNote } from '../types';
@@ -30,8 +31,9 @@ const DailyNotesPage: React.FC = () => {
     const editorRef = useRef<HTMLTextAreaElement>(null);
     const [noteToDelete, setNoteToDelete] = useState<string | null>(null);
 
-    const fetchNotes = () => {
-        setNotes(getDailyNotes());
+    // FIX: Make fetchNotes async to await getDailyNotes.
+    const fetchNotes = async () => {
+        setNotes(await getDailyNotes());
     };
 
     useEffect(() => {
@@ -49,13 +51,14 @@ const DailyNotesPage: React.FC = () => {
         setTimeout(() => setFeedbackMessage(null), 3000);
     };
 
-    const handleSave = () => {
+    // FIX: Make handleSave async to await saveDailyNote.
+    const handleSave = async () => {
         const existingNote = notes.find(n => n.date === selectedDate);
         if (existingNote && noteContent.trim() === '') {
             setNoteToDelete(selectedDate);
             return;
         }
-        saveDailyNote(selectedDate, noteContent);
+        await saveDailyNote(selectedDate, noteContent);
         showFeedback('Catatan berhasil disimpan!');
         fetchNotes();
     };
@@ -64,9 +67,10 @@ const DailyNotesPage: React.FC = () => {
         setNoteToDelete(dateToDelete);
     };
     
-    const handleConfirmDelete = () => {
+    // FIX: Make handleConfirmDelete async to await deleteDailyNote.
+    const handleConfirmDelete = async () => {
         if (noteToDelete) {
-            deleteDailyNote(noteToDelete);
+            await deleteDailyNote(noteToDelete);
             fetchNotes();
             if (noteToDelete === selectedDate) {
                 setNoteContent('');
