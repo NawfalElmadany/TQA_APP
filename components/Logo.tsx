@@ -1,35 +1,16 @@
 
-import React, { useState, useEffect } from 'react';
-import { getCustomLogo } from '../data/dataService';
+import React from 'react';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface LogoProps {
   className?: string;
 }
 
 const Logo: React.FC<LogoProps> = ({ className = 'w-10 h-10' }) => {
-  const [customLogo, setCustomLogo] = useState<string | null>(null);
+  const { logoUrl } = useTheme();
 
-  useEffect(() => {
-    // FIX: Make updateLogo async to await getCustomLogo.
-    const updateLogo = async () => {
-        setCustomLogo(await getCustomLogo());
-    };
-    updateLogo(); // Initial load
-
-    // Custom event for instant updates within the same tab
-    window.addEventListener('logoUpdated', updateLogo);
-    
-    // Also listen to storage events as a fallback for cross-tab updates
-    window.addEventListener('storage', updateLogo);
-
-    return () => {
-      window.removeEventListener('logoUpdated', updateLogo);
-      window.removeEventListener('storage', updateLogo);
-    };
-  }, []);
-
-  if (customLogo) {
-    return <img src={customLogo} alt="Logo TQA App" className={className} />;
+  if (logoUrl) {
+    return <img src={logoUrl} alt="App Logo" className={className} />;
   }
 
   return (

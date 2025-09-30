@@ -7,9 +7,10 @@ import { signIn } from '../data/dataService';
 interface TeacherLoginPageProps {
   onLogin: () => void;
   onBack: () => void;
+  onSelectRegister: () => void;
 }
 
-const TeacherLoginPage: React.FC<TeacherLoginPageProps> = ({ onLogin, onBack }) => {
+const TeacherLoginPage: React.FC<TeacherLoginPageProps> = ({ onLogin, onBack, onSelectRegister }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
@@ -133,10 +134,13 @@ const TeacherLoginPage: React.FC<TeacherLoginPageProps> = ({ onLogin, onBack }) 
                 </Button>
             </div>
           </form>
-           <div className="text-center mt-6">
+           <div className="text-center mt-6 flex justify-between items-center">
               <a href="#" className="text-sm text-slate-500 dark:text-gray-400 hover:text-brand-accent transition-colors duration-200">
                 Lupa Password?
               </a>
+              <button onClick={onSelectRegister} className="text-sm text-slate-500 dark:text-gray-400 hover:text-brand-accent transition-colors duration-200 font-medium">
+                Buat Akun Baru
+              </button>
             </div>
         </div>
       </div>

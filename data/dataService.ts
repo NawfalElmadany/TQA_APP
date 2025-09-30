@@ -1,86 +1,124 @@
 
-import { supabase } from '../lib/supabaseClient';
-import { User, Student, StudentProfileData, TartiliRecord, HafalanRecord, JuzTarget, SurahTarget, HafalanStatus, TeacherProfile, MurojaahRecord, DailyNote, Reminder, ReportStudentData, ReportProgress, WeeklySchedule, ScheduleEntry } from '../types';
+import { Student, StudentProfileData, TartiliRecord, HafalanRecord, JuzTarget, SurahTarget, HafalanStatus, MurojaahRecord, ReportStudentData, WeeklySchedule, ScheduleEntry, DailyNote, Reminder } from '../types';
 import { JUZ_29_SURAHS, JUZ_30_SURAHS, TARTILI_LEVELS } from '../constants';
 
-const BUCKET_NAME = 'app_assets';
+// --- MOCK DATABASE ---
+let mockData = createInitialMockData();
 
-// --- AUTHENTICATION ---
-export const getSession = async () => {
-    const { data } = await supabase.auth.getSession();
-    return data.session;
-};
+function createInitialMockData() {
+    const students = [
+        { id: 1, name: 'Ahmad Fauzi', class: '5C', join_date: '2023-01-15', profile_pic_url: null, current_tartili_level: 'Tartili 3' },
+        { id: 2, name: 'Budi Santoso', class: '5C', join_date: '2023-01-20', profile_pic_url: null, current_tartili_level: 'Tartili 4' },
+        { id: 3, name: 'Citra Lestari', class: '5D', join_date: '2023-02-01', profile_pic_url: null, current_tartili_level: 'Tartili 2' },
+        { id: 4, name: 'Dewi Anggraini', class: '6C', join_date: '2023-02-05', profile_pic_url: null, current_tartili_level: 'Tartili 3' },
+        { id: 5, name: 'Eka Wijaya', class: '6D', join_date: '2022-08-10', profile_pic_url: null, current_tartili_level: 'Gharib' },
+    ];
 
-export const signIn = async (email: string, password: string) => {
-    return await supabase.auth.signInWithPassword({ email, password });
-};
+    const tartili_history = [
+        { id: 1, student_id: 1, date: '2024-05-10', level: 'Tartili 3', page: '1-5', score: 90, notes: 'Bagus', created_at: new Date().toISOString() },
+        { id: 2, student_id: 2, date: '2024-05-11', level: 'Tartili 4', page: '10', score: 85, notes: 'Perlu latihan lagi', created_at: new Date().toISOString() },
+        { id: 3, student_id: 1, date: '2024-04-15', level: 'Tartili 2', page: '20-22', score: 95, notes: 'Sangat lancar', created_at: new Date().toISOString() },
+    ];
 
-export const signOut = async () => {
-    return await supabase.auth.signOut();
-};
-
-// FIX: Add missing registerUser function.
-export const registerUser = async (email: string, password: string): Promise<{ success: boolean; message: string; }> => {
-    const { error } = await supabase.auth.signUp({
-        email,
-        password,
+    const hafalan_history = [
+        { id: 1, student_id: 1, date: '2024-05-12', surah: "An-Naba'", ayat: '1-10', score: 88, notes: 'Tajwid cukup baik.', created_at: new Date().toISOString() },
+        { id: 2, student_id: 2, date: '2024-05-12', surah: "Al-Ghashiyah", ayat: '1-5', score: 92, notes: 'Lancar', created_at: new Date().toISOString() },
+        { id: 3, student_id: 1, date: '2024-05-14', surah: "An-Naba'", ayat: '11-20', score: 90, notes: 'Makhraj huruf ditingkatkan', created_at: new Date().toISOString() },
+    ];
+    
+    const murojaah_history = [
+        { id: 1, student_id: 1, date: '2024-05-09', surah: "An-Nas", score: 95, notes: 'Sangat lancar', created_at: new Date().toISOString() },
+    ];
+    
+    let hafalan_targets: any[] = [];
+    students.forEach(s => {
+        const studentTargets = [
+            ...JUZ_30_SURAHS.map(surah => ({ student_id: s.id, juz: 30, surah_name: surah.name, total_ayat: surah.totalAyat, memorized_ayat: 0 })),
+            ...JUZ_29_SURAHS.map(surah => ({ student_id: s.id, juz: 29, surah_name: surah.name, total_ayat: surah.totalAyat, memorized_ayat: 0 })),
+        ];
+        hafalan_targets.push(...studentTargets);
     });
-    if (error) {
-        return { success: false, message: error.message };
-    }
-    return { success: true, message: 'Registrasi berhasil! Silakan periksa email Anda untuk konfirmasi.' };
-};
 
-const getCurrentUserId = async (): Promise<string | null> => {
-    const session = await getSession();
-    return session?.user?.id || null;
-};
+    // Manually update some memorized ayat based on history
+    const anNabaTarget = hafalan_targets.find(t => t.student_id === 1 && t.surah_name === "An-Naba'");
+    if (anNabaTarget) anNabaTarget.memorized_ayat = 20;
+    const alGhashiyahTarget = hafalan_targets.find(t => t.student_id === 2 && t.surah_name === "Al-Ghashiyah");
+    if (alGhashiyahTarget) alGhashiyahTarget.memorized_ayat = 5;
 
+    const schedule = {
+        'Senin': {
+            '5D': { period: '1-2', time: '07:30-08:40', subject: 'TQA' },
+            '6D': { period: '3-4', time: '08:40-09:50', subject: 'TQA' },
+            '6C': { period: '5-6', time: '10:05-11:15', subject: 'TQA' },
+            '5C': { period: '9', time: '13:10-13:45', subject: 'TQA' }
+        },
+        'Selasa': {
+            '6C': { period: '1-2', time: '07:30-08:40', subject: 'TQA' },
+            '5C': { period: '3-4', time: '08:40-09:50', subject: 'TQA' },
+            '5D': { period: '5-6', time: '10:05-11:15', subject: 'TQA' },
+            '6D': { period: '9', time: '13:10-13:45', subject: 'TQA' }
+        },
+        'Rabu': {
+            '5C': { period: '1-2', time: '07:30-08:40', subject: 'TQA' },
+            '5D': { period: '5-6', time: '10:05-11:15', subject: 'TQA' },
+            '6D': { period: '7-8', time: '11:15-12:25', subject: 'TQA' },
+            '6C': { period: '9-11', time: '13:10-14:55', subject: 'TQA & TIK' }
+        },
+        'Kamis': {
+            '5C': { period: '3-4', time: '08:40-09:50', subject: 'TQA' },
+            '6C': { period: '5-6', time: '10:05-11:15', subject: 'TQA' },
+            '6D': { period: '7-8', time: '11:15-12:25', subject: 'TQA' },
+            '5D': { period: '9-11', time: '13:10-14:55', subject: 'TQA & TIK' }
+        },
+    };
+
+    const users = [
+        { id: 1, name: 'Ustadz', email: 'teacher@example.com', password: 'password123' },
+    ];
+
+    return {
+        students,
+        tartili_history,
+        hafalan_history,
+        murojaah_history,
+        hafalan_targets,
+        schedule,
+        daily_notes: [],
+        reminders: [],
+        users,
+    };
+}
+
+let nextIds = {
+    student: 6,
+    tartili: 4,
+    hafalan: 4,
+    murojaah: 2,
+    reminder: 1,
+};
 
 // --- CLASSES & STUDENTS ---
 export const getClasses = async (): Promise<string[]> => {
-    const { data, error } = await supabase.from('students').select('class');
-    if (error) {
-        console.error("Error fetching classes:", error);
-        return [];
-    }
-    // FIX: Explicitly type the map parameter `s` to ensure TypeScript correctly infers the result as `string[]`, resolving the `unknown[]` error.
-    const uniqueClasses = [...new Set((data || []).map((s: { class: string }) => s.class))];
-    return uniqueClasses.sort();
+    const classList = mockData.students.map(s => s.class);
+    return Promise.resolve([...new Set(classList)].sort());
 };
 
 export const getStudents = async (className?: string): Promise<Student[]> => {
-    let query = supabase.from('students').select('*');
+    let result = mockData.students;
     if (className) {
-        query = query.eq('class', className);
+        result = result.filter(s => s.class === className);
     }
-    const { data, error } = await query.order('name');
-    if (error) {
-        console.error("Error fetching students:", error);
-        return [];
-    }
-    return data;
+    return Promise.resolve(result.sort((a, b) => a.name.localeCompare(b.name)));
 };
 
 export const getStudentProfileById = async (id: number): Promise<StudentProfileData | null> => {
-    // This function now needs to aggregate data from multiple tables
-    const { data: student, error: studentError } = await supabase.from('students').select('*').eq('id', id).single();
-    if (studentError || !student) {
-        console.error("Error fetching student profile:", studentError);
-        return null;
-    }
+    const student = mockData.students.find(s => s.id === id);
+    if (!student) return Promise.resolve(null);
 
-    const [
-        { data: tartiliHistory },
-        { data: hafalanHistory },
-        { data: murojaahHistory },
-        { data: hafalanTargetsRaw }
-    ] = await Promise.all([
-        supabase.from('tartili_history').select('*').eq('student_id', id).order('date', { ascending: false }),
-        supabase.from('hafalan_history').select('*').eq('student_id', id).order('date', { ascending: false }),
-        supabase.from('murojaah_history').select('*').eq('student_id', id).order('date', { ascending: false }),
-        supabase.from('hafalan_targets').select('*').eq('student_id', id)
-    ]);
+    const tartiliHistory = mockData.tartili_history.filter(h => h.student_id === id).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const hafalanHistory = mockData.hafalan_history.filter(h => h.student_id === id).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const murojaahHistory = mockData.murojaah_history.filter(h => h.student_id === id).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const hafalanTargetsRaw = mockData.hafalan_targets.filter(t => t.student_id === id);
 
     const processChartData = (records: {date: string, score: number}[]) => 
         (records || []).map(r => ({ name: new Date(r.date + 'T00:00:00').toLocaleString('default', { month: 'short' }), score: r.score }));
@@ -106,471 +144,353 @@ export const getStudentProfileById = async (id: number): Promise<StudentProfileD
         return acc;
     }, []);
 
-    return {
+    return Promise.resolve({
         id: student.id,
         name: student.name,
         class: student.class,
         joinDate: student.join_date,
         profilePic: student.profile_pic_url,
         currentTartiliLevel: student.current_tartili_level,
-        tartiliHistory: tartiliHistory || [],
-        hafalanHistory: hafalanHistory || [],
-        murojaahHistory: murojaahHistory || [],
-        tartiliChartData: processChartData(tartiliHistory || []),
-        hafalanChartData: processChartData(hafalanHistory || []),
-        murojaahChartData: processChartData(murojaahHistory || []),
+        tartiliHistory,
+        hafalanHistory,
+        murojaahHistory,
+        tartiliChartData: processChartData(tartiliHistory),
+        hafalanChartData: processChartData(hafalanHistory),
+        murojaahChartData: processChartData(murojaahHistory),
         hafalanTargets,
-    };
+    });
 };
 
 export const getAllProfiles = async (): Promise<StudentProfileData[]> => {
-    const { data: students, error } = await supabase.from('students').select('*').order('name');
-    if (error) {
-        console.error("Error fetching all students for profiles:", error);
-        return [];
-    }
-    const profiles = await Promise.all(students.map(s => getStudentProfileById(s.id)));
+    const profiles = await Promise.all(mockData.students.map(s => getStudentProfileById(s.id)));
     return profiles.filter((p): p is StudentProfileData => p !== null);
 };
 
 export const addStudent = async (name: string, className: string) => {
-    const { data, error } = await supabase.from('students').insert({ 
-        name, 
+    const newStudentId = nextIds.student++;
+    const newStudent = {
+        id: newStudentId,
+        name: name,
         class: className.toUpperCase().trim(),
         join_date: new Date().toISOString().split('T')[0],
-        current_tartili_level: TARTILI_LEVELS[0]
-    }).select().single();
-
-    if (error) {
-        console.error("Error adding student:", error);
-        return null;
-    }
+        current_tartili_level: TARTILI_LEVELS[0],
+        profile_pic_url: null
+    };
+    mockData.students.push(newStudent);
     
     const targetsToInsert = [
-        ...JUZ_30_SURAHS.map(s => ({ student_id: data.id, juz: 30, surah_name: s.name, total_ayat: s.totalAyat, memorized_ayat: 0})),
-        ...JUZ_29_SURAHS.map(s => ({ student_id: data.id, juz: 29, surah_name: s.name, total_ayat: s.totalAyat, memorized_ayat: 0}))
+        ...JUZ_30_SURAHS.map(s => ({ student_id: newStudentId, juz: 30, surah_name: s.name, total_ayat: s.totalAyat, memorized_ayat: 0 })),
+        ...JUZ_29_SURAHS.map(s => ({ student_id: newStudentId, juz: 29, surah_name: s.name, total_ayat: s.totalAyat, memorized_ayat: 0 })),
     ];
-    await supabase.from('hafalan_targets').insert(targetsToInsert);
-
-    return data;
+    mockData.hafalan_targets.push(...targetsToInsert);
+    
+    return Promise.resolve(newStudent);
 };
 
 export const deleteStudent = async (studentId: number) => {
-    const { error } = await supabase.from('students').delete().eq('id', studentId);
-    if (error) console.error("Error deleting student:", error);
+    mockData.students = mockData.students.filter(s => s.id !== studentId);
+    mockData.tartili_history = mockData.tartili_history.filter(h => h.student_id !== studentId);
+    mockData.hafalan_history = mockData.hafalan_history.filter(h => h.student_id !== studentId);
+    mockData.murojaah_history = mockData.murojaah_history.filter(h => h.student_id !== studentId);
+    mockData.hafalan_targets = mockData.hafalan_targets.filter(t => t.student_id !== studentId);
+    return Promise.resolve();
 };
 
 export const updateStudentProfile = async (id: number, updatedData: Partial<StudentProfileData>) => {
-    const studentUpdate: Partial<Student> & { profile_pic_url?: string | null, join_date?: string } = {};
-    if (updatedData.name) studentUpdate.name = updatedData.name;
-    if (updatedData.profilePic) studentUpdate.profile_pic_url = updatedData.profilePic;
-    if (updatedData.joinDate) studentUpdate.join_date = updatedData.joinDate;
-    
-    const { error } = await supabase.from('students').update(studentUpdate).eq('id', id);
-    if (error) console.error("Error updating student profile:", error);
+    const student = mockData.students.find(s => s.id === id);
+    if (student) {
+        if (updatedData.name) student.name = updatedData.name;
+        if (updatedData.joinDate) student.join_date = updatedData.joinDate;
+        if (updatedData.profilePic !== undefined) student.profile_pic_url = updatedData.profilePic;
+    }
+    return Promise.resolve();
 };
 
-// --- RECORD MANAGEMENT ---
-export const addTartiliRecord = async (studentId: number, record: TartiliRecord) => {
-    await supabase.from('tartili_history').insert({ student_id: studentId, ...record });
-    await supabase.from('students').update({ current_tartili_level: record.level }).eq('id', studentId);
+// FIX: Add signIn and registerUser functions for authentication.
+// --- AUTHENTICATION ---
+export const signIn = async (email: string, password: string): Promise<{ error: string | null }> => {
+    const user = mockData.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+    if (!user || user.password !== password) {
+        return Promise.resolve({ error: 'Invalid email or password.' });
+    }
+    return Promise.resolve({ error: null });
+};
+
+export const registerUser = async (email: string, password: string): Promise<{ success: boolean }> => {
+    const existingUser = mockData.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+    if (existingUser) {
+        return Promise.resolve({ success: false });
+    }
+    const newUser = {
+        id: (mockData.users.length > 0 ? Math.max(...mockData.users.map(u => u.id)) : 0) + 1,
+        name: 'New Teacher',
+        email: email,
+        password: password,
+    };
+    mockData.users.push(newUser);
+    return Promise.resolve({ success: true });
+};
+
+// --- DATA INPUT & HISTORY ---
+const addRecord = (
+    history: (TartiliRecord & {id: number, student_id: number, created_at: string})[] | (HafalanRecord & {id: number, student_id: number, created_at: string})[] | (MurojaahRecord & {id: number, student_id: number, created_at: string})[],
+    studentId: number,
+    record: any,
+    nextId: 'tartili' | 'hafalan' | 'murojaah'
+) => {
+    const newRecord = {
+        id: nextIds[nextId]++,
+        student_id: studentId,
+        ...record,
+        created_at: new Date().toISOString(),
+    };
+    history.unshift(newRecord as any);
+};
+
+export const addTartiliRecord = async (studentId: number, record: Omit<TartiliRecord, 'id' | 'student_id' | 'created_at'>) => {
+    addRecord(mockData.tartili_history, studentId, record, 'tartili');
+    return Promise.resolve();
+};
+
+export const addHafalanRecord = async (studentId: number, record: Omit<HafalanRecord, 'id' | 'student_id' | 'created_at'>) => {
+    addRecord(mockData.hafalan_history, studentId, record, 'hafalan');
+    
+    // Update hafalan targets
+    const target = mockData.hafalan_targets.find(t => t.student_id === studentId && t.surah_name === record.surah);
+    if (target) {
+        const [ayatFrom, ayatTo] = record.ayat.split('-').map(Number);
+        const lastAyatMemorized = ayatTo || ayatFrom;
+        if (lastAyatMemorized > target.memorized_ayat) {
+            target.memorized_ayat = lastAyatMemorized;
+        }
+    }
+    return Promise.resolve();
+};
+
+export const addMurojaahRecord = async (studentId: number, record: Omit<MurojaahRecord, 'id' | 'student_id' | 'created_at'>) => {
+    addRecord(mockData.murojaah_history, studentId, record, 'murojaah');
+    return Promise.resolve();
+};
+
+const deleteLastRecord = (
+    history: ({ student_id: number, created_at: string })[],
+    studentId: number
+) => {
+    const records = history.filter(h => h.student_id === studentId);
+    if (records.length > 0) {
+        records.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        const lastRecord = records[0];
+        const index = history.findIndex(h => h === lastRecord);
+        if (index > -1) {
+            history.splice(index, 1);
+        }
+    }
 };
 
 export const deleteLastTartiliRecord = async (studentId: number) => {
-    const { data: lastRecord } = await supabase.from('tartili_history').select('id').eq('student_id', studentId).order('created_at', { ascending: false }).limit(1).single();
-    if (lastRecord) {
-        await supabase.from('tartili_history').delete().eq('id', lastRecord.id);
-    }
-};
-
-export const graduateStudentTartili = async (studentId: number, passedLevel: string, score: number, notes: string, date: string) => {
-    const drillRecord = {
-        date,
-        level: passedLevel,
-        page: 'Ujian',
-        score,
-        notes: `LULUS UJIAN DRILL - ${passedLevel}. ${notes || ''}`.trim(),
-    };
-    await addTartiliRecord(studentId, drillRecord);
-    
-    const currentLevelIndex = TARTILI_LEVELS.indexOf(passedLevel);
-    let newLevel = "Lulus Tartili";
-    if (currentLevelIndex > -1 && currentLevelIndex < TARTILI_LEVELS.length - 1) {
-        newLevel = TARTILI_LEVELS[currentLevelIndex + 1];
-    }
-    await supabase.from('students').update({ current_tartili_level: newLevel }).eq('id', studentId);
-};
-
-const recalculateSurahTarget = async (studentId: number, surahName: string) => {
-    const { data: surahTarget, error: targetError } = await supabase.from('hafalan_targets').select('id, total_ayat').eq('student_id', studentId).eq('surah_name', surahName).single();
-    if (targetError || !surahTarget) return;
-
-    const { data: relevantHistory, error: historyError } = await supabase.from('hafalan_history').select('ayat').eq('student_id', studentId).eq('surah', surahName);
-    if (historyError) return;
-
-    let totalMemorized = 0;
-    const memorizedAyats = new Set<number>();
-    for (const record of relevantHistory) {
-        const [start, end] = record.ayat.split('-').map(Number);
-        const endAyat = end || start;
-        for (let i = start; i <= endAyat; i++) {
-            memorizedAyats.add(i);
-        }
-    }
-    totalMemorized = memorizedAyats.size;
-
-    await supabase.from('hafalan_targets').update({ memorized_ayat: totalMemorized }).eq('id', surahTarget.id);
-};
-
-export const addHafalanRecord = async (studentId: number, record: HafalanRecord) => {
-    await supabase.from('hafalan_history').insert({ student_id: studentId, ...record });
-    await recalculateSurahTarget(studentId, record.surah);
+    deleteLastRecord(mockData.tartili_history, studentId);
+    return Promise.resolve();
 };
 
 export const deleteLastHafalanRecord = async (studentId: number) => {
-    const { data: lastRecord } = await supabase.from('hafalan_history').select('id, surah').eq('student_id', studentId).order('created_at', { ascending: false }).limit(1).single();
-    if (lastRecord) {
-        await supabase.from('hafalan_history').delete().eq('id', lastRecord.id);
-        await recalculateSurahTarget(studentId, lastRecord.surah);
-    }
-};
-
-export const addMurojaahRecord = async (studentId: number, record: MurojaahRecord) => {
-    await supabase.from('murojaah_history').insert({ student_id: studentId, ...record });
+    deleteLastRecord(mockData.hafalan_history, studentId);
+    // Note: Reverting hafalan target progress is complex and omitted for simplicity.
+    return Promise.resolve();
 };
 
 export const deleteLastMurojaahRecord = async (studentId: number) => {
-    const { data: lastRecord } = await supabase.from('murojaah_history').select('id').eq('student_id', studentId).order('created_at', { ascending: false }).limit(1).single();
-    if (lastRecord) {
-        await supabase.from('murojaah_history').delete().eq('id', lastRecord.id);
-    }
+    deleteLastRecord(mockData.murojaah_history, studentId);
+    return Promise.resolve();
 };
 
-// --- DASHBOARD DATA ---
-export const getRecentMemorizations = async () => {
-    const { data, error } = await supabase
-        .from('hafalan_history')
-        .select('student_id, surah, date, students(name), hafalan_targets(total_ayat, memorized_ayat, surah_name)')
-        .order('date', { ascending: false })
-        .limit(20);
-
-    if (error) {
-        console.error("Error getting recent memorizations:", error);
-        return [];
+export const graduateStudentTartili = async (studentId: number, level: string, score: number, notes: string | undefined, date: string) => {
+    const student = mockData.students.find(s => s.id === studentId);
+    if (student) {
+        const currentLevelIndex = TARTILI_LEVELS.indexOf(student.current_tartili_level);
+        if (currentLevelIndex !== -1 && currentLevelIndex < TARTILI_LEVELS.length - 1) {
+            student.current_tartili_level = TARTILI_LEVELS[currentLevelIndex + 1];
+        }
+        
+        // Add a "LULUS" record to history
+        await addTartiliRecord(studentId, {
+            date,
+            level,
+            page: 'LULUS',
+            score,
+            notes: notes ? `LULUS. ${notes}` : 'LULUS.',
+        });
     }
+    return Promise.resolve();
+};
 
-    const uniqueStudents = Array.from(new Set(data.map(item => item.student_id)))
-        .map(id => data.find(item => item.student_id === id))
+// --- RECENT MEMORIZATIONS ---
+export const getRecentMemorizations = async () => {
+    const recent = mockData.hafalan_history
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
         .slice(0, 6);
-
-    return uniqueStudents.map(item => {
-        if (!item || !item.students || !item.hafalan_targets) return null;
-        const target = (item.hafalan_targets as any[]).find(t => t.surah_name === item.surah);
+    
+    return Promise.resolve(recent.map(r => {
+        const student = mockData.students.find(s => s.id === r.student_id);
+        const target = mockData.hafalan_targets.find(t => t.student_id === r.student_id && t.surah_name === r.surah);
         const progress = target ? (target.memorized_ayat / target.total_ayat) * 100 : 0;
         return {
-            studentId: item.student_id,
-            student: item.students.name,
-            surah: item.surah,
-            progress: progress,
+            studentId: student?.id,
+            student: student?.name || 'Unknown',
+            surah: r.surah,
+            progress: Math.min(100, progress), // Cap at 100%
         };
-    }).filter(Boolean);
-};
-
-
-export const getOverallProgress = async (): Promise<number> => {
-    const { data, error } = await supabase.from('hafalan_targets').select('total_ayat, memorized_ayat');
-    if (error) {
-        console.error("Error getting overall progress:", error);
-        return 0;
-    }
-    const totalAyat = data.reduce((sum, s) => sum + s.total_ayat, 0);
-    const memorizedAyat = data.reduce((sum, s) => sum + s.memorized_ayat, 0);
-    return totalAyat > 0 ? (memorizedAyat / totalAyat) * 100 : 0;
-};
-
-export const getDashboardChartData = async () => {
-    // This is a complex aggregation, often better done with a database function (RPC in Supabase).
-    // The simplified version below fetches recent data and processes it client-side.
-    const threeMonthsAgo = new Date();
-    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-    const dateThreshold = threeMonthsAgo.toISOString().split('T')[0];
-
-    const [
-        { data: tartiliData },
-        { data: hafalanData },
-        { data: murojaahData }
-    ] = await Promise.all([
-        supabase.from('tartili_history').select('date, score').gte('date', dateThreshold),
-        supabase.from('hafalan_history').select('date, score').gte('date', dateThreshold),
-        supabase.from('murojaah_history').select('date, score').gte('date', dateThreshold)
-    ]);
-
-    const aggregateByMonth = (records: {date: string, score: number}[] | null) => {
-        if (!records) return {};
-        return records.reduce((acc, record) => {
-            const month = new Date(record.date + 'T00:00:00').toLocaleString('default', { month: 'short' });
-            if (!acc[month]) acc[month] = { total: 0, count: 0 };
-            acc[month].total += record.score;
-            acc[month].count++;
-            return acc;
-        }, {} as Record<string, { total: number, count: number }>);
-    };
-
-    const tartiliAvg = aggregateByMonth(tartiliData);
-    const hafalanAvg = aggregateByMonth(hafalanData);
-    const murojaahAvg = aggregateByMonth(murojaahData);
-
-    const allMonths = [...new Set([...Object.keys(tartiliAvg), ...Object.keys(hafalanAvg), ...Object.keys(murojaahAvg)])];
-    
-    return allMonths.map(month => ({
-        name: month,
-        tartiliScore: tartiliAvg[month] ? Math.round(tartiliAvg[month].total / tartiliAvg[month].count) : null,
-        hafalanScore: hafalanAvg[month] ? Math.round(hafalanAvg[month].total / hafalanAvg[month].count) : null,
-        murojaahScore: murojaahAvg[month] ? Math.round(murojaahAvg[month].total / murojaahAvg[month].count) : null,
     }));
 };
 
-// --- TEACHER PROFILE ---
-export const getTeacherProfile = async (): Promise<TeacherProfile | null> => {
-    const userId = await getCurrentUserId();
-    if (!userId) return null;
-
-    const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
-    if (error) {
-        console.error("Error fetching teacher profile:", error);
-        return null;
-    }
-    return {
-        name: data.name,
-        email: data.email,
-        profilePic: data.profile_pic_url
-    };
+export const getOverallProgress = async () => {
+    const totalTarget = mockData.hafalan_targets.reduce((sum, t) => sum + t.total_ayat, 0);
+    const totalMemorized = mockData.hafalan_targets.reduce((sum, t) => sum + t.memorized_ayat, 0);
+    return Promise.resolve(totalTarget > 0 ? (totalMemorized / totalTarget) * 100 : 0);
 };
 
-export const saveTeacherProfile = async (profile: TeacherProfile) => {
-    const userId = await getCurrentUserId();
-    if (!userId) return;
+export const getDashboardChartData = async () => {
+    const allRecords = [
+        ...mockData.tartili_history.map(r => ({ ...r, type: 'tartili' })),
+        ...mockData.hafalan_history.map(r => ({ ...r, type: 'hafalan' })),
+        ...mockData.murojaah_history.map(r => ({ ...r, type: 'murojaah' })),
+    ];
 
-    await supabase.from('profiles').update({
-        name: profile.name,
-        email: profile.email,
-        profile_pic_url: profile.profilePic
-    }).eq('id', userId);
+    const groupedByMonth = allRecords.reduce((acc, record) => {
+        const month = new Date(record.date + 'T00:00:00').toLocaleString('default', { month: 'short', year: '2-digit' });
+        if (!acc[month]) {
+            acc[month] = { tartili: [], hafalan: [], murojaah: [] };
+        }
+        acc[month][record.type].push(record.score);
+        return acc;
+    }, {} as Record<string, { tartili: number[], hafalan: number[], murojaah: number[] }>);
+
+    const calculateAverage = (arr: number[]) => arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
+
+    return Promise.resolve(
+        Object.entries(groupedByMonth).map(([month, scores]) => ({
+            name: month,
+            tartiliScore: calculateAverage(scores.tartili),
+            hafalanScore: calculateAverage(scores.hafalan),
+            murojaahScore: calculateAverage(scores.murojaah),
+        }))
+    );
 };
 
 // --- REPORTING ---
 export const getReportDataForClass = async (className: string, startDate: string, endDate: string): Promise<ReportStudentData[]> => {
-    const students = await getStudents(className);
-    if (!students || students.length === 0) return [];
+    const studentsInClass = mockData.students.filter(s => s.class === className);
+    const start = new Date(startDate + 'T00:00:00');
+    const end = new Date(endDate + 'T23:59:59');
 
-    const reportData = await Promise.all(students.map(async (student) => {
-        const [
-            { data: tartiliHistory },
-            { data: hafalanHistory },
-            { data: murojaahHistory }
-        ] = await Promise.all([
-            supabase.from('tartili_history').select('date, level, page').eq('student_id', student.id).lte('date', endDate).order('date'),
-            supabase.from('hafalan_history').select('date, surah, ayat').eq('student_id', student.id).lte('date', endDate).order('date'),
-            supabase.from('murojaah_history').select('date, surah').eq('student_id', student.id).lte('date', endDate).order('date')
-        ]);
-        
-        const findProgress = (history: any[] | null, date: string, fields: string[]) => {
-            if (!history) return ' - ';
-            const record = history.filter(h => h.date < date).pop();
-            return record ? fields.map(f => record[f]).join(' ') : ' - ';
-        };
-        
-        const findLastProgress = (history: any[] | null, fields: string[]) => {
-            if (!history || history.length === 0) return ' - ';
-            const record = history[history.length - 1];
-            return record ? fields.map(f => record[f]).join(' ') : ' - ';
+    const getProgress = (history: any[], studentId: number) => {
+        const studentHistory = history
+            .filter(h => h.student_id === studentId)
+            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+        const awalRecord = studentHistory.find(h => new Date(h.date) < start);
+        const akhirRecord = studentHistory.filter(h => new Date(h.date) <= end).pop();
+
+        const formatRecord = (r: any, type: 'tartili' | 'hafalan' | 'murojaah') => {
+            if (!r) return '-';
+            if (type === 'tartili') return `${r.level} Hal. ${r.page}`;
+            if (type === 'hafalan') return `${r.surah} Ayat ${r.ayat}`;
+            if (type === 'murojaah') return `${r.surah}`;
+            return '-';
         }
 
         return {
-            id: student.id,
-            name: student.name,
-            tartili: { awal: findProgress(tartiliHistory, startDate, ['level', 'page']), akhir: findLastProgress(tartiliHistory, ['level', 'page']) },
-            hafalan: { awal: findProgress(hafalanHistory, startDate, ['surah', 'ayat']), akhir: findLastProgress(hafalanHistory, ['surah', 'ayat']) },
-            murojaah: { awal: findProgress(murojaahHistory, startDate, ['surah']), akhir: findLastProgress(murojaahHistory, ['surah']) },
+            awal: formatRecord(awalRecord, history === mockData.tartili_history ? 'tartili' : history === mockData.hafalan_history ? 'hafalan' : 'murojaah'),
+            akhir: formatRecord(akhirRecord, history === mockData.tartili_history ? 'tartili' : history === mockData.hafalan_history ? 'hafalan' : 'murojaah')
         };
-    }));
+    };
 
-    return reportData;
-};
-
-// --- DAILY NOTES & REMINDERS ---
-export const getDailyNotes = async (): Promise<DailyNote[]> => {
-    const userId = await getCurrentUserId();
-    if (!userId) return [];
-    const { data, error } = await supabase.from('daily_notes').select('date, content').eq('user_id', userId).order('date', { ascending: false });
-    return error ? [] : data;
-};
-
-export const saveDailyNote = async (date: string, content: string) => {
-    const userId = await getCurrentUserId();
-    if (!userId) return;
-    await supabase.from('daily_notes').upsert({ user_id: userId, date, content }, { onConflict: 'user_id, date' });
-};
-
-export const deleteDailyNote = async (date: string) => {
-    const userId = await getCurrentUserId();
-    if (!userId) return;
-    await supabase.from('daily_notes').delete().match({ user_id: userId, date });
-};
-
-export const getReminders = async (): Promise<Reminder[]> => {
-    const userId = await getCurrentUserId();
-    if (!userId) return [];
-    const { data, error } = await supabase.from('reminders').select('*').eq('user_id', userId).order('created_at', { ascending: false });
-    return error ? [] : data;
-};
-
-export const getRemindersCount = async (): Promise<{ totalCount: number, unreadCount: number }> => {
-    const reminders = await getReminders();
-    return { totalCount: reminders.length, unreadCount: reminders.length };
-};
-
-export const addReminder = async (content: string) => {
-    const userId = await getCurrentUserId();
-    if (!userId) return;
-    await supabase.from('reminders').insert({ user_id: userId, content });
-};
-
-export const deleteReminder = async (id: number) => {
-    await supabase.from('reminders').delete().eq('id', id);
+    return Promise.resolve(studentsInClass.map(student => ({
+        id: student.id,
+        name: student.name,
+        tartili: getProgress(mockData.tartili_history, student.id),
+        hafalan: getProgress(mockData.hafalan_history, student.id),
+        murojaah: getProgress(mockData.murojaah_history, student.id)
+    })));
 };
 
 // --- SCHEDULE ---
 export const getSchedule = async (): Promise<WeeklySchedule> => {
-    const { data, error } = await supabase.from('schedules').select('*');
-    if (error) {
-        console.error("Error fetching schedule:", error);
-        return {};
-    }
-    const weeklySchedule: WeeklySchedule = {};
-    for (const entry of data) {
-        if (!weeklySchedule[entry.day_of_week]) {
-            weeklySchedule[entry.day_of_week] = {};
-        }
-        weeklySchedule[entry.day_of_week][entry.class_name] = {
-            period: entry.period,
-            time: entry.time,
-            subject: entry.subject
-        };
-    }
-    return weeklySchedule;
+    return Promise.resolve(mockData.schedule);
 };
 
 export const updateSchedule = async (day: string, className: string, newEntry: ScheduleEntry) => {
-    await supabase.from('schedules').update({
-        period: newEntry.period,
-        time: newEntry.time,
-        subject: newEntry.subject
-    }).match({ day_of_week: day, class_name: className });
-};
-
-// --- SETTINGS & PERSONALIZATION ---
-export const saveCustomLogo = async (file: File): Promise<string | null> => {
-    const fileName = `public/logo-${Date.now()}`;
-    const { data: uploadData, error: uploadError } = await supabase.storage
-        .from(BUCKET_NAME)
-        .upload(fileName, file, { cacheControl: '3600', upsert: true });
-
-    if (uploadError) {
-        console.error("Error uploading logo:", uploadError);
-        return null;
+    if (mockData.schedule[day] && mockData.schedule[day][className]) {
+        mockData.schedule[day][className] = newEntry;
     }
-
-    const { data: urlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(uploadData.path);
-    const publicUrl = urlData.publicUrl;
-
-    await supabase.from('settings').upsert({ key: 'custom_logo_url', value: publicUrl });
-
-    return publicUrl;
+    return Promise.resolve();
 };
 
-export const deleteCustomLogo = async () => {
-    const { data } = await supabase.from('settings').select('value').eq('key', 'custom_logo_url').single();
+// --- DAILY NOTES & REMINDERS ---
+export const getDailyNotes = async (): Promise<DailyNote[]> => {
+    return Promise.resolve(mockData.daily_notes.sort((a,b) => b.date.localeCompare(a.date)));
+};
 
-    if (data && data.value) {
-        const filePath = data.value.substring(data.value.lastIndexOf('/') + 1);
-        if (filePath) {
-            await supabase.storage.from(BUCKET_NAME).remove([`public/${filePath}`]);
-        }
+export const saveDailyNote = async (date: string, content: string): Promise<void> => {
+    const existingNoteIndex = mockData.daily_notes.findIndex(n => n.date === date);
+    if (existingNoteIndex !== -1) {
+        mockData.daily_notes[existingNoteIndex].content = content;
+    } else {
+        mockData.daily_notes.push({ date, content, createdAt: new Date().toISOString() });
     }
-    
-    await supabase.from('settings').delete().eq('key', 'custom_logo_url');
+    return Promise.resolve();
 };
 
-export const getCustomLogo = async (): Promise<string | null> => {
-    const { data, error } = await supabase.from('settings').select('value').eq('key', 'custom_logo_url').single();
-    if (error || !data) {
-        return null;
-    }
-    return data.value;
+export const deleteDailyNote = async (date: string): Promise<void> => {
+    mockData.daily_notes = mockData.daily_notes.filter(n => n.date !== date);
+    return Promise.resolve();
 };
 
-// --- DATA MANAGEMENT (IMPORT/EXPORT) ---
-export const exportAllData = async (): Promise<{ success: boolean, message: string, data?: string }> => {
+export const getReminders = async (): Promise<Reminder[]> => {
+    return Promise.resolve(mockData.reminders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+};
+
+export const addReminder = async (content: string): Promise<Reminder> => {
+    const newReminder: Reminder = {
+        id: nextIds.reminder++,
+        content,
+        createdAt: new Date().toISOString()
+    };
+    mockData.reminders.push(newReminder);
+    return Promise.resolve(newReminder);
+};
+
+export const deleteReminder = async (id: number): Promise<void> => {
+    mockData.reminders = mockData.reminders.filter(r => r.id !== id);
+    return Promise.resolve();
+};
+
+// --- DATA MANAGEMENT ---
+export const exportAllData = async () => {
     try {
-        const tables = [
-            'students', 'tartili_history', 'hafalan_history', 'murojaah_history', 
-            'hafalan_targets', 'daily_notes', 'reminders', 'schedules', 'settings', 'profiles'
-        ];
-        
-        const exportedData: { [key: string]: any[] } = {};
-
-        for (const table of tables) {
-            const { data, error } = await supabase.from(table).select('*');
-            if (error) throw new Error(`Error exporting ${table}: ${error.message}`);
-            exportedData[table] = data || [];
-        }
-
-        return { success: true, message: 'Export successful!', data: JSON.stringify(exportedData, null, 2) };
-    } catch (e) {
-        const err = e as Error;
-        console.error("Export error:", err);
-        return { success: false, message: `Export failed: ${err.message}` };
+        const dataToExport = JSON.stringify(mockData, null, 2);
+        return { success: true, data: dataToExport };
+    } catch (error) {
+        console.error("Export failed:", error);
+        return { success: false, data: null };
     }
 };
 
-export const importAllData = async (jsonString: string): Promise<{ success: boolean, message: string }> => {
+export const importAllData = async (jsonData: string) => {
     try {
-        const dataToImport = JSON.parse(jsonString);
-
-        // Clear data, respecting foreign key constraints by deleting children first.
-        await supabase.from('tartili_history').delete().gt('id', -1);
-        await supabase.from('hafalan_history').delete().gt('id', -1);
-        await supabase.from('murojaah_history').delete().gt('id',-1);
-        await supabase.from('hafalan_targets').delete().gt('id',-1);
-        await supabase.from('students').delete().gt('id', -1);
-        
-        const userId = await getCurrentUserId();
-        if (userId) {
-            await supabase.from('daily_notes').delete().eq('user_id', userId);
-            await supabase.from('reminders').delete().eq('user_id', userId);
+        const importedData = JSON.parse(jsonData);
+        // Basic validation
+        if (importedData.students && importedData.tartili_history) {
+            // FIX: Add users array if it doesn't exist in the imported data to prevent crashes.
+            if (!importedData.users) {
+                importedData.users = [{ id: 1, name: 'Ustadz', email: 'teacher@example.com', password: 'password123' }];
+            }
+            mockData = importedData;
+            return { success: true, message: "Data berhasil diimpor! Aplikasi akan dimuat ulang." };
+        } else {
+            return { success: false, message: "File tidak valid. Pastikan file backup berasal dari aplikasi ini." };
         }
-
-        await supabase.from('schedules').delete().gt('id', -1);
-        await supabase.from('settings').delete().neq('key', 'a-non-existent-key');
-        
-        // Insert data, parents first.
-        if (dataToImport.students) await supabase.from('students').insert(dataToImport.students);
-        if (dataToImport.tartili_history) await supabase.from('tartili_history').insert(dataToImport.tartili_history);
-        if (dataToImport.hafalan_history) await supabase.from('hafalan_history').insert(dataToImport.hafalan_history);
-        if (dataToImport.murojaah_history) await supabase.from('murojaah_history').insert(dataToImport.murojaah_history);
-        if (dataToImport.hafalan_targets) await supabase.from('hafalan_targets').insert(dataToImport.hafalan_targets);
-        if (dataToImport.daily_notes) await supabase.from('daily_notes').insert(dataToImport.daily_notes);
-        if (dataToImport.reminders) await supabase.from('reminders').insert(dataToImport.reminders);
-        if (dataToImport.schedules) await supabase.from('schedules').insert(dataToImport.schedules);
-        
-        if (dataToImport.settings) await supabase.from('settings').upsert(dataToImport.settings);
-        if (dataToImport.profiles) await supabase.from('profiles').upsert(dataToImport.profiles);
-
-        return { success: true, message: 'Data berhasil diimpor! Aplikasi akan dimuat ulang.' };
-    } catch (e) {
-        const err = e as Error;
-        console.error("Import error:", err);
-        return { success: false, message: `Import failed: ${err.message}` };
+    } catch (error) {
+        console.error("Import failed:", error);
+        return { success: false, message: "Gagal mengimpor data. File JSON mungkin rusak." };
     }
 };

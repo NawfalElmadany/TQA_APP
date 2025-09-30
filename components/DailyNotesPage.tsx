@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useRef } from 'react';
 import { getDailyNotes, saveDailyNote, deleteDailyNote } from '../data/dataService';
 import { DailyNote } from '../types';
@@ -23,7 +24,7 @@ const formatDate = (dateString: string) => {
     });
 };
 
-const DailyNotesPage: React.FC = () => {
+const CatatanHarianPage: React.FC = () => {
     const [notes, setNotes] = useState<DailyNote[]>([]);
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
     const [noteContent, setNoteContent] = useState('');
@@ -31,7 +32,6 @@ const DailyNotesPage: React.FC = () => {
     const editorRef = useRef<HTMLTextAreaElement>(null);
     const [noteToDelete, setNoteToDelete] = useState<string | null>(null);
 
-    // FIX: Make fetchNotes async to await getDailyNotes.
     const fetchNotes = async () => {
         setNotes(await getDailyNotes());
     };
@@ -51,7 +51,6 @@ const DailyNotesPage: React.FC = () => {
         setTimeout(() => setFeedbackMessage(null), 3000);
     };
 
-    // FIX: Make handleSave async to await saveDailyNote.
     const handleSave = async () => {
         const existingNote = notes.find(n => n.date === selectedDate);
         if (existingNote && noteContent.trim() === '') {
@@ -67,7 +66,6 @@ const DailyNotesPage: React.FC = () => {
         setNoteToDelete(dateToDelete);
     };
     
-    // FIX: Make handleConfirmDelete async to await deleteDailyNote.
     const handleConfirmDelete = async () => {
         if (noteToDelete) {
             await deleteDailyNote(noteToDelete);
@@ -192,4 +190,4 @@ const DailyNotesPage: React.FC = () => {
     );
 };
 
-export default DailyNotesPage;
+export default CatatanHarianPage;

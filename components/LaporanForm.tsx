@@ -1,4 +1,6 @@
 
+
+
 import React, { useState, useEffect } from 'react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -71,10 +73,8 @@ const LaporanForm: React.FC = () => {
       student.murojaah.akhir
     ]);
     
-    // FIX: Removed `as const` from `fillColor` to satisfy the expected mutable array type `[number, number, number]` required by jspdf-autotable styles.
-    const headStyles = { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'bold' as const };
-    // FIX: Removed `as const` from `fillColor` to satisfy the expected mutable array type `[number, number, number]` required by jspdf-autotable styles.
-    const alternateRowStyles = { fillColor: [245, 245, 245] };
+    const headStyles = { fillColor: [41, 128, 185] as [number, number, number], textColor: 255, fontStyle: 'bold' as const };
+    const alternateRowStyles = { fillColor: [245, 245, 245] as [number, number, number] };
 
     autoTable(doc, {
       head: head,

@@ -1,9 +1,10 @@
 
-import React, { useState, useRef, useEffect } from 'react';
-import { exportAllData, importAllData, saveCustomLogo, deleteCustomLogo, getCustomLogo } from '../data/dataService';
+import React, { useState, useRef } from 'react';
+import { exportAllData, importAllData } from '../data/dataService';
 import { Button, ErrorMessage, SuccessMessage } from './FormCard';
 import Icon from './Icon';
 import ImportConfirmationModal from './ImportConfirmationModal';
+import { useTheme } from '../contexts/ThemeContext';
 import Logo from './Logo';
 
 const Card: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => (
@@ -13,27 +14,19 @@ const Card: React.FC<{ children: React.ReactNode, className?: string }> = ({ chi
 );
 
 const PengaturanPage: React.FC = () => {
+  const { logoUrl, setLogoUrl } = useTheme();
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error', message: string } | null>(null);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const logoFileInputRef = useRef<HTMLInputElement>(null);
-  const [currentLogo, setCurrentLogo] = useState<string | null>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
-  // FIX: Fetch logo asynchronously.
-  useEffect(() => {
-    const fetchLogo = async () => {
-        setCurrentLogo(await getCustomLogo());
-    };
-    fetchLogo();
-  }, []);
 
   const showFeedback = (message: string, type: 'success' | 'error' = 'success') => {
     setFeedback({ type, message });
     setTimeout(() => setFeedback(null), 5000);
   };
 
-  // FIX: Make handleExport async to await exportAllData.
   const handleExport = async () => {
     const result = await exportAllData();
     if (result.success && result.data) {
@@ -48,7 +41,7 @@ const PengaturanPage: React.FC = () => {
       URL.revokeObjectURL(url);
       showFeedback('Data berhasil diekspor!');
     } else {
-      showFeedback(result.message || 'Gagal mengekspor data.', 'error');
+      showFeedback('Gagal mengekspor data.', 'error');
     }
   };
 
@@ -69,7 +62,6 @@ const PengaturanPage: React.FC = () => {
     if (!importFile) return;
     
     const reader = new FileReader();
-    // FIX: Make onload handler async to await importAllData.
     reader.onload = async (e) => {
       const content = e.target?.result;
       if (typeof content === 'string') {
@@ -91,27 +83,24 @@ const PengaturanPage: React.FC = () => {
     setImportFile(null);
   };
 
-  // FIX: Make handleLogoUpload async and pass the File object to saveCustomLogo.
-  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const url = await saveCustomLogo(file);
-      if (url) {
-        setCurrentLogo(url);
-        window.dispatchEvent(new Event('logoUpdated'));
-        showFeedback('Logo berhasil diperbarui!');
-      } else {
-        showFeedback('Gagal mengunggah logo.', 'error');
-      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        setLogoUrl(reader.result as string);
+        showFeedback('Logo berhasil diubah.');
+      };
+      reader.onerror = () => {
+        showFeedback('Gagal membaca file gambar.', 'error');
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  // FIX: Make handleRemoveLogo async to await deleteCustomLogo.
-  const handleRemoveLogo = async () => {
-    await deleteCustomLogo();
-    setCurrentLogo(null);
-    window.dispatchEvent(new Event('logoUpdated'));
-    showFeedback('Logo kustom telah dihapus.');
+  const handleResetLogo = () => {
+    setLogoUrl(null);
+    showFeedback('Logo berhasil direset ke default.');
   };
 
   return (
@@ -132,42 +121,35 @@ const PengaturanPage: React.FC = () => {
           </div>
         )}
 
-        <div className="max-w-xl space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <Card>
-                <h3 className="text-xl font-semibold mb-2 text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <h3 className="text-xl font-semibold mb-4 text-slate-900 dark:text-slate-100 flex items-center gap-2">
                     <Icon name="profil" className="w-6 h-6"/>
-                    Personalisasi
+                    Logo Aplikasi
                 </h3>
-                <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">Ubah logo aplikasi agar sesuai dengan identitas Anda.</p>
-                
-                <div className="mt-6 flex items-center gap-6 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-                    <Logo className="w-16 h-16 flex-shrink-0" />
-                    <div className="flex-grow">
-                        <h4 className="font-semibold text-slate-800 dark:text-slate-100">Logo Aplikasi</h4>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">Gunakan file gambar (.png, .jpg, .svg).</p>
-                    </div>
+                 <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
+                    Ubah logo aplikasi yang akan tampil di seluruh halaman. Gunakan gambar dengan format PNG, JPG, atau SVG.
+                </p>
+                <div className="flex flex-col items-center justify-center space-y-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-border dark:border-dark-border">
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Logo Saat Ini:</p>
+                    <Logo className="w-20 h-20"/>
                 </div>
-
-                <input
+                 <input
                     type="file"
-                    ref={logoFileInputRef}
-                    onChange={handleLogoUpload}
+                    ref={logoInputRef}
+                    onChange={handleLogoChange}
                     className="hidden"
-                    accept="image/*"
+                    accept="image/png, image/jpeg, image/svg+xml"
                 />
-
-                <div className="flex flex-col sm:flex-row gap-4 mt-6">
-                    <Button type="button" onClick={() => logoFileInputRef.current?.click()} className="w-full">
+                <div className="mt-6 flex flex-col sm:flex-row gap-4">
+                     <Button type="button" onClick={() => logoInputRef.current?.click()} className="w-full !bg-brand-accent hover:!bg-brand-accent-darker focus:!ring-brand-accent flex items-center justify-center gap-2">
+                        <Icon name="upload" className="w-5 h-5"/>
                         Ubah Logo
                     </Button>
-                    <button 
-                        type="button" 
-                        onClick={handleRemoveLogo}
-                        disabled={!currentLogo}
-                        className="w-full bg-transparent border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-medium py-3 px-4 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-                    >
-                        Hapus Logo Kustom
-                    </button>
+                    <Button type="button" onClick={handleResetLogo} disabled={!logoUrl} className="w-full !bg-slate-600 hover:!bg-slate-700 focus:!ring-slate-500 flex items-center justify-center gap-2">
+                        <Icon name="trash" className="w-5 h-5"/>
+                        Reset Logo
+                    </Button>
                 </div>
             </Card>
 
@@ -177,7 +159,7 @@ const PengaturanPage: React.FC = () => {
                     Manajemen Data
                 </h3>
                 <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
-                    Ekspor semua data (siswa, nilai, profil guru, dll.) ke dalam satu file cadangan. Anda dapat mengimpor file ini nanti untuk memulihkan data.
+                    Ekspor semua data ke dalam satu file cadangan. Anda dapat mengimpor file ini nanti untuk memulihkan data.
                 </p>
                 <input
                     type="file"

@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { Button, Input, SuccessMessage } from './FormCard';
 import Icon from './Icon';
@@ -7,9 +8,10 @@ import { registerUser } from '../data/dataService';
 
 interface RegistrationPageProps {
   onNavigateToLogin: () => void;
+  onBack: () => void;
 }
 
-const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigateToLogin }) => {
+const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigateToLogin, onBack }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -38,7 +40,6 @@ const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigateToLogin }
     return newErrors;
   };
 
-  // FIX: Make handleSubmit async to await registerUser.
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setApiError('');
@@ -58,14 +59,23 @@ const RegistrationPage: React.FC<RegistrationPageProps> = ({ onNavigateToLogin }
         onNavigateToLogin();
       }, 2000);
     } else {
-      setApiError(result.message);
+      setApiError("Gagal mendaftar. Pengguna mungkin sudah ada.");
     }
     setIsLoading(false);
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 font-sans">
-      <div className="w-full max-w-md animate-fade-in">
+      <div className="w-full max-w-md animate-fade-in relative">
+        <button
+            onClick={onBack}
+            className="absolute -top-16 left-0 md:top-4 md:left-4 bg-card dark:bg-dark-card border border-border dark:border-dark-border text-slate-600 dark:text-slate-300 p-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/60 hover:text-slate-800 dark:hover:text-white transition-colors duration-200"
+            aria-label="Kembali ke Login"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+        </button>
         <div className="text-center mb-8">
             <Logo className="w-18 h-18 sm:w-24 sm:h-24 mx-auto mb-6 transition-transform duration-500 ease-in-out hover:scale-110 hover:rotate-3" />
             <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Buat Akun Baru</h1>

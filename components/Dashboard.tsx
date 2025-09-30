@@ -1,10 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { getRecentMemorizations, getOverallProgress, getDashboardChartData, getTeacherProfile, saveTeacherProfile } from '../data/dataService';
+import { getRecentMemorizations, getOverallProgress, getDashboardChartData } from '../data/dataService';
 import Icon from './Icon';
-import { TeacherProfile } from '../types';
-import EditTeacherProfileModal from './EditTeacherProfileModal';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface DashboardProps {
@@ -84,32 +82,15 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectStudent }) => {
   const [recentMemorizations, setRecentMemorizations] = useState<any[]>([]);
   const [overallProgress, setOverallProgress] = useState(0);
   const [chartData, setChartData] = useState<any[]>([]);
-  const [teacherProfile, setTeacherProfile] = useState<TeacherProfile | null>(null);
-  const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
 
-  // FIX: Use an async function inside useEffect to fetch data and await the results.
   useEffect(() => {
     const fetchData = async () => {
       setRecentMemorizations(await getRecentMemorizations());
       setOverallProgress(await getOverallProgress());
       setChartData(await getDashboardChartData());
-      setTeacherProfile(await getTeacherProfile());
     };
     fetchData();
   }, []);
-
-  // FIX: Make handleSaveProfile async to await saveTeacherProfile.
-  const handleSaveProfile = async (updatedProfile: TeacherProfile) => {
-    await saveTeacherProfile(updatedProfile);
-    setTeacherProfile(updatedProfile);
-    setIsEditProfileModalOpen(false);
-  };
-
-  const defaultAvatar = (
-    <div className="w-16 h-16 rounded-full bg-slate-200 dark:bg-slate-700 border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center">
-      <Icon name="profil" className="w-8 h-8 text-slate-500 dark:text-slate-400" />
-    </div>
-  );
 
   const gridColor = themeMode === 'light' ? '#e2e8f0' : '#334155';
   const axisColor = themeMode === 'light' ? '#64748b' : '#94a3b8';
@@ -127,18 +108,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectStudent }) => {
         <div className="flex justify-between items-start sm:items-center">
             <div className="border-b border-border dark:border-dark-border pb-5 flex-grow">
               <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-50">Dashboard</h2>
-              <p className="text-slate-500 dark:text-slate-400 mt-1">Selamat datang kembali, {teacherProfile?.name || 'Ustadz'}!</p>
+              <p className="text-slate-500 dark:text-slate-400 mt-1">Selamat datang kembali, Ustadz!</p>
             </div>
-          <div className="relative group cursor-pointer ml-6 flex-shrink-0" onClick={() => setIsEditProfileModalOpen(true)}>
-              {teacherProfile?.profilePic ? (
-                  <img src={teacherProfile.profilePic} alt="Foto Profil" className="w-16 h-16 rounded-full object-cover border-2 border-brand-accent shadow" />
-              ) : (
-                  defaultAvatar
-              )}
-              <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" aria-label="Ubah profil">
-                  <Icon name="camera" className="w-6 h-6 text-white" />
-              </div>
-          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -178,13 +149,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectStudent }) => {
           </div>
         </Card>
       </div>
-
-      <EditTeacherProfileModal 
-          isOpen={isEditProfileModalOpen}
-          onClose={() => setIsEditProfileModalOpen(false)}
-          profile={teacherProfile}
-          onSave={handleSaveProfile}
-      />
     </>
   );
 };

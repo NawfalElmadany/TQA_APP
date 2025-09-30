@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { getReminders, addReminder, deleteReminder } from '../data/dataService';
 import { Reminder } from '../types';
@@ -12,7 +13,7 @@ const Card: React.FC<{ children: React.ReactNode, className?: string }> = ({ chi
   </div>
 );
 
-interface RemindersPageProps {
+interface PengingatPageProps {
     onRemindersUpdate: () => void;
 }
 
@@ -28,17 +29,11 @@ const playNotificationSound = () => {
     oscillator.connect(gainNode);
     gainNode.connect(audioContext.destination);
 
-    // Use a 'sine' wave for a clean, simple tone
     oscillator.type = 'sine';
-    
-    // Set a lower volume for a more subtle sound
     gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
 
-    // A single, elegant high-pitched note
     const now = audioContext.currentTime;
-    oscillator.frequency.setValueAtTime(1200, now); // A high, clean pitch
-
-    // Quick fade out for a simple "ping" effect
+    oscillator.frequency.setValueAtTime(1200, now);
     gainNode.gain.exponentialRampToValueAtTime(0.00001, now + 0.3);
 
     oscillator.start(now);
@@ -46,13 +41,12 @@ const playNotificationSound = () => {
 };
 
 
-const RemindersPage: React.FC<RemindersPageProps> = ({ onRemindersUpdate }) => {
+const PengingatPage: React.FC<PengingatPageProps> = ({ onRemindersUpdate }) => {
   const [newReminderContent, setNewReminderContent] = useState('');
   const [feedbackMessage, setFeedbackMessage] = useState<string>('');
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [reminderToDelete, setReminderToDelete] = useState<Reminder | null>(null);
 
-  // FIX: Make fetchReminders async to await getReminders.
   const fetchReminders = async () => {
     setReminders(await getReminders());
   };
@@ -61,24 +55,22 @@ const RemindersPage: React.FC<RemindersPageProps> = ({ onRemindersUpdate }) => {
     fetchReminders();
   }, []);
 
-  // FIX: Make handleAddReminder async to await addReminder.
   const handleAddReminder = async () => {
     if (newReminderContent.trim()) {
       await addReminder(newReminderContent);
       playNotificationSound();
       setFeedbackMessage('Pengingat berhasil ditambahkan!');
       setNewReminderContent('');
-      fetchReminders();
+      await fetchReminders();
       onRemindersUpdate();
       setTimeout(() => setFeedbackMessage(''), 3000);
     }
   };
   
-  // FIX: Make handleConfirmDelete async to await deleteReminder.
   const handleConfirmDelete = async () => {
     if (reminderToDelete) {
       await deleteReminder(reminderToDelete.id);
-      fetchReminders();
+      await fetchReminders();
       onRemindersUpdate();
       setReminderToDelete(null); // Close modal
     }
@@ -155,4 +147,4 @@ const RemindersPage: React.FC<RemindersPageProps> = ({ onRemindersUpdate }) => {
   );
 };
 
-export default RemindersPage;
+export default PengingatPage;

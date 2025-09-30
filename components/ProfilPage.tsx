@@ -1,4 +1,6 @@
 
+
+
 import React, { useState, useEffect } from 'react';
 import { getStudents, getStudentProfileById, updateStudentProfile, deleteStudent, addStudent, getAllProfiles } from '../data/dataService';
 import { Student, StudentProfileData } from '../types';
@@ -164,7 +166,8 @@ const ProfilPage: React.FC<ProfilPageProps> = ({ onSelectStudent }) => {
                   >
                     <div className="border-t border-border dark:border-dark-border pt-5">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                          {students.map(student => (
+                          {/* FIX: Explicitly cast students to an array to resolve type error. */}
+                          {(students as Array<Student & { profilePic: string | null }>).map(student => (
                             <StudentCard 
                               key={student.id} 
                               student={student} 

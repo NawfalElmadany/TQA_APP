@@ -1,16 +1,5 @@
 
 
-export interface User {
-  email: string;
-  password: string;
-}
-
-export interface TeacherProfile {
-  name: string;
-  email: string;
-  profilePic: string | null;
-}
-
 export interface Student {
   id: number;
   name: string;
@@ -27,11 +16,11 @@ export enum Page {
   Dashboard = "Dashboard",
   TargetHafalan = "Target Hafalan",
   InputData = "Input Data",
-  CatatanHarian = "Catatan Harian",
-  Pengingat = "Pengingat",
   Laporan = "Laporan",
   JadwalPelajaran = "Jadwal Pelajaran",
   Profil = "Profil Siswa",
+  CatatanHarian = "Catatan Harian",
+  Pengingat = "Pengingat",
   Pengaturan = "Pengaturan",
 }
 
@@ -48,7 +37,6 @@ export interface HafalanRecord {
   surah: string;
   ayat: string; // e.g., "1-7"
   score: number;
-  // FIX: Add optional notes property to store teacher feedback.
   notes?: string;
 }
 
@@ -89,17 +77,6 @@ export interface StudentProfileData {
   hafalanTargets: JuzTarget[];
 }
 
-export interface DailyNote {
-  date: string;
-  content: string;
-}
-
-export interface Reminder {
-  id: number;
-  content: string;
-  createdAt: string;
-}
-
 export interface ReportProgress {
   awal: string;
   akhir: string;
@@ -121,3 +98,22 @@ export interface ScheduleEntry {
 }
 export type DailySchedule = Record<string, ScheduleEntry>; // Key is className
 export type WeeklySchedule = Record<string, DailySchedule>; // Key is dayName
+// FIX: Added TeacherProfile, DailyNote, and Reminder types.
+export interface TeacherProfile {
+  id: string;
+  name: string;
+  email: string;
+  profilePic: string | null;
+}
+
+export interface DailyNote {
+  date: string; // YYYY-MM-DD
+  content: string;
+  createdAt: string;
+}
+
+export interface Reminder {
+  id: number;
+  content: string;
+  createdAt: string;
+}

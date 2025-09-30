@@ -5,6 +5,8 @@ export type ThemeMode = 'light' | 'dark';
 interface ThemeContextType {
   themeMode: ThemeMode;
   setThemeMode: (mode: ThemeMode) => void;
+  logoUrl: string | null;
+  setLogoUrl: (url: string | null) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -15,11 +17,13 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (storedTheme) {
       return storedTheme;
     }
-    // Check for window existence for SSR safety, although not strictly needed in this CSR app
     return typeof window !== 'undefined' && window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
 
-  // Effect to apply changes and save to localStorage
+  const [logoUrl, setLogoUrl] = useState<string | null>(() => {
+    return localStorage.getItem('customLogoUrl');
+  });
+
   useEffect(() => {
     const root = document.documentElement;
     
@@ -38,12 +42,21 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     root.style.setProperty('--color-accent-l', `${accentColor.l}%`);
     root.style.setProperty('--color-accent-darker-l', `${accentColor.l * 0.9}%`);
 
-  }, [themeMode]);
+    // Persist custom logo
+    if (logoUrl) {
+      localStorage.setItem('customLogoUrl', logoUrl);
+    } else {
+      localStorage.removeItem('customLogoUrl');
+    }
+
+  }, [themeMode, logoUrl]);
 
   const value = useMemo(() => ({
     themeMode,
     setThemeMode,
-  }), [themeMode]);
+    logoUrl,
+    setLogoUrl,
+  }), [themeMode, logoUrl]);
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 };

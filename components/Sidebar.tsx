@@ -9,13 +9,12 @@ interface SidebarProps {
   activePage: Page;
   setActivePage: (page: Page) => void;
   onLogout: () => void;
-  unreadReminderCount: number;
-  onMarkRemindersAsRead: () => void;
+  remindersCount: number;
 }
 
 const NavItem: React.FC<{
   page: Page;
-  iconName: 'dashboard' | 'target' | 'input' | 'laporan' | 'profil' | 'notes' | 'calendar' | 'settings' | 'schedule';
+  iconName: 'dashboard' | 'target' | 'input' | 'laporan' | 'profil' | 'settings' | 'schedule' | 'notes' | 'bookmark';
   activePage: Page;
   onClick: () => void;
   badgeCount?: number;
@@ -42,7 +41,7 @@ const NavItem: React.FC<{
   );
 };
 
-const Sidebar: React.FC<SidebarProps> = ({ activePage, setActivePage, onLogout, unreadReminderCount, onMarkRemindersAsRead }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activePage, setActivePage, onLogout, remindersCount }) => {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   const handleLogoutConfirm = () => {
@@ -50,11 +49,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, setActivePage, onLogout, 
     setIsLogoutModalOpen(false);
   };
   
-  const handlePengingatClick = () => {
-    setActivePage(Page.Pengingat);
-    onMarkRemindersAsRead();
-  };
-
   return (
     <>
       <aside className="w-full md:w-64 bg-white dark:bg-dark-card border-r border-border dark:border-dark-border p-4 md:p-6 flex-shrink-0 flex flex-col justify-between">
@@ -68,17 +62,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, setActivePage, onLogout, 
               <NavItem page={Page.Dashboard} iconName="dashboard" activePage={activePage} onClick={() => setActivePage(Page.Dashboard)} />
               <NavItem page={Page.TargetHafalan} iconName="target" activePage={activePage} onClick={() => setActivePage(Page.TargetHafalan)} />
               <NavItem page={Page.InputData} iconName="input" activePage={activePage} onClick={() => setActivePage(Page.InputData)} />
-              <NavItem page={Page.CatatanHarian} iconName="notes" activePage={activePage} onClick={() => setActivePage(Page.CatatanHarian)} />
-              <NavItem 
-                page={Page.Pengingat} 
-                iconName="calendar" 
-                activePage={activePage} 
-                onClick={handlePengingatClick}
-                badgeCount={unreadReminderCount}
-              />
               <NavItem page={Page.Laporan} iconName="laporan" activePage={activePage} onClick={() => setActivePage(Page.Laporan)} />
               <NavItem page={Page.JadwalPelajaran} iconName="schedule" activePage={activePage} onClick={() => setActivePage(Page.JadwalPelajaran)} />
               <NavItem page={Page.Profil} iconName="profil" activePage={activePage} onClick={() => setActivePage(Page.Profil)} />
+              <NavItem page={Page.CatatanHarian} iconName="notes" activePage={activePage} onClick={() => setActivePage(Page.CatatanHarian)} />
+              <NavItem page={Page.Pengingat} iconName="bookmark" activePage={activePage} onClick={() => setActivePage(Page.Pengingat)} badgeCount={remindersCount} />
               <NavItem page={Page.Pengaturan} iconName="settings" activePage={activePage} onClick={() => setActivePage(Page.Pengaturan)} />
             </ul>
           </nav>
