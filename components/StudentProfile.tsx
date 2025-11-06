@@ -2,6 +2,7 @@
 
 
 
+
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { getStudentProfileById, updateStudentProfile } from '../data/dataService';
@@ -159,10 +160,10 @@ const StudentProfile: React.FC<StudentProfileProps> = ({ studentId, onBack }) =>
       });
   };
 
-  const gridColor = themeMode === 'light' ? '#e2e8f0' : '#334155';
+  const gridColor = themeMode === 'light' ? '#e2e8f0' : '#3A3B3D';
   const axisColor = themeMode === 'light' ? '#64748b' : '#94a3b8';
   const tooltipStyle = {
-      backgroundColor: themeMode === 'light' ? '#ffffff' : '#1e293b',
+      backgroundColor: themeMode === 'light' ? '#ffffff' : '#242526',
       border: `1px solid ${gridColor}`,
       borderRadius: '0.75rem'
   };
@@ -175,7 +176,7 @@ const StudentProfile: React.FC<StudentProfileProps> = ({ studentId, onBack }) =>
                 <div className="flex items-center gap-4">
                     <button
                         onClick={onBack}
-                        className="bg-card dark:bg-dark-card border border-border dark:border-dark-border text-slate-600 dark:text-slate-300 p-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/60 hover:text-slate-800 dark:hover:text-slate-100 transition-colors duration-200 flex-shrink-0"
+                        className="bg-card dark:bg-dark-card border border-border dark:border-dark-border text-slate-600 dark:text-slate-300 p-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-dark-border/60 hover:text-slate-800 dark:hover:text-slate-100 transition-colors duration-200 flex-shrink-0"
                         aria-label="Kembali"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -232,8 +233,8 @@ const StudentProfile: React.FC<StudentProfileProps> = ({ studentId, onBack }) =>
                             />
                             <Legend />
                             <Line type="monotone" dataKey="tartiliScore" name="Tartili" stroke="hsl(var(--color-accent-h) var(--color-accent-s) var(--color-accent-l))" strokeWidth={3} dot={{ r: 5 }} activeDot={{ r: 8 }} connectNulls />
-                            <Line type="monotone" dataKey="hafalanScore" name="Hafalan" stroke="#8884d8" strokeWidth={3} dot={{ r: 5 }} activeDot={{ r: 8 }} connectNulls />
-                            <Line type="monotone" dataKey="murojaahScore" name="Murojaah" stroke="#f472b6" strokeWidth={3} dot={{ r: 5 }} activeDot={{ r: 8 }} connectNulls />
+                            <Line type="monotone" dataKey="hafalanScore" name="Hafalan" stroke="#00E0FF" strokeWidth={3} dot={{ r: 5 }} activeDot={{ r: 8 }} connectNulls />
+                            <Line type="monotone" dataKey="murojaahScore" name="Murojaah" stroke="#FF4FB8" strokeWidth={3} dot={{ r: 5 }} activeDot={{ r: 8 }} connectNulls />
                         </LineChart>
                     </ResponsiveContainer>
                 </div>

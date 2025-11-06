@@ -21,8 +21,8 @@ const Logo: React.FC<LogoProps> = ({ className = 'w-10 h-10' }) => {
         .logo-screen { fill: white; }
         .logo-person { fill: #4A4A4A; }
 
-        .dark .logo-screen { fill: #1e293b; }
-        .dark .logo-person { fill: #cbd5e1; }
+        .dark .logo-screen { fill: #242526; }
+        .dark .logo-person { fill: #FFFFFF; }
       `}</style>
       <svg 
         viewBox="0 0 64 64" 

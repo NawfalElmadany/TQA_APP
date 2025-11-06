@@ -45,7 +45,7 @@ export const TextArea = React.forwardRef<
 TextArea.displayName = 'TextArea';
 
 export const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = (props) => (
-    <button {...props} className={`w-full bg-brand-accent text-white font-bold py-3 px-4 rounded-lg hover:bg-brand-accent-darker focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background dark:focus:ring-offset-dark-background transition-all duration-300 hover:shadow-md hover:shadow-brand-accent/30 disabled:opacity-75 disabled:cursor-not-allowed disabled:shadow-none ${props.className}`}>
+    <button {...props} className={`w-full bg-brand-accent text-white font-bold py-3 px-4 rounded-lg hover:bg-brand-accent-darker focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background dark:focus:ring-offset-dark-background transition-all duration-300 hover:shadow-glow-accent disabled:opacity-75 disabled:cursor-not-allowed disabled:shadow-none ${props.className}`}>
         {props.children}
     </button>
 );

@@ -36,7 +36,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     localStorage.setItem('themeMode', themeMode);
 
     // Apply fixed accent color CSS variables
-    const accentColor = { h: 240, s: 60, l: 65 }; // Professional Indigo/Violet
+    const accentColor = { h: 261, s: 100, l: 65 }; // New Primary: #8A4FFF
     root.style.setProperty('--color-accent-h', `${accentColor.h}`);
     root.style.setProperty('--color-accent-s', `${accentColor.s}%`);
     root.style.setProperty('--color-accent-l', `${accentColor.l}%`);

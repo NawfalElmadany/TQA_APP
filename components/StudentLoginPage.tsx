@@ -90,7 +90,6 @@ const StudentLoginPage: React.FC<StudentLoginPageProps> = ({ onLogin, onBack }) 
                 <Button 
                     type="submit" 
                     disabled={!selectedStudentId}
-                    className="shadow-glow-accent"
                 >
                     MASUK
                 </Button>

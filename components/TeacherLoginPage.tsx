@@ -121,7 +121,6 @@ const TeacherLoginPage: React.FC<TeacherLoginPageProps> = ({ onLogin, onBack, on
                 <Button 
                     type="submit" 
                     disabled={isLoading}
-                    className="w-full shadow-glow-accent"
                 >
                     {isLoading ? (
                         <div className="flex items-center justify-center">

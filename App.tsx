@@ -131,7 +131,7 @@ const App: React.FC = () => {
   if (userType === 'teacher') {
     return (
         <>
-            <div className="min-h-screen flex font-sans">
+            <div className="min-h-screen flex font-sans bg-background dark:bg-dark-background">
                 <Sidebar 
                 activePage={activePage} 
                 setActivePage={setActivePage} 
@@ -144,7 +144,7 @@ const App: React.FC = () => {
                         onLogoutClick={() => setIsLogoutModalOpen(true)}
                         onSettingsClick={() => setActivePage(Page.Pengaturan)}
                     />
-                    <main className="flex-1 p-4 md:p-8 overflow-y-auto bg-background dark:bg-dark-background">
+                    <main className="flex-1 p-4 md:p-8 overflow-y-auto">
                         {renderTeacherContent()}
                     </main>
                 </div>

@@ -15,7 +15,7 @@ const LoginOptionCard: React.FC<{
 }> = ({ onClick, icon, title, description }) => (
   <button
     onClick={onClick}
-    className="group w-full bg-black/20 border border-brand-accent/20 rounded-2xl p-6 text-left hover:border-brand-accent/50 hover:bg-black/30 transition-all duration-300 transform hover:-translate-y-1"
+    className="group w-full bg-black/20 border border-brand-accent/20 rounded-2xl p-6 text-left hover:border-brand-accent/50 hover:bg-black/30 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-glow-accent"
   >
     <div className="flex items-center space-x-5">
       <div className={`p-4 rounded-xl transition-all duration-300 bg-brand-accent/10 border border-brand-accent/20 group-hover:bg-brand-accent/20 group-hover:border-brand-accent/40`}>

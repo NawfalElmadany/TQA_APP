@@ -10,7 +10,7 @@ interface DashboardProps {
 }
 
 const Card: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => (
-  <div className={`bg-card dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-6 shadow-sm ${className}`}>
+  <div className={`bg-dark-card border border-dark-border rounded-xl p-6 shadow-md ${className}`}>
     {children}
   </div>
 );
@@ -24,7 +24,7 @@ const CircularProgress: React.FC<{ progress: number, size?: number, strokeWidth?
     <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
       <svg className="absolute" width={size} height={size}>
         <circle
-          className="stroke-slate-200 dark:stroke-slate-700"
+          className="stroke-slate-700"
           fill="transparent"
           strokeWidth={strokeWidth}
           r={radius}
@@ -51,7 +51,7 @@ const CircularProgress: React.FC<{ progress: number, size?: number, strokeWidth?
           </linearGradient>
         </defs>
       </svg>
-      <span className="absolute text-2xl font-bold text-slate-700 dark:text-slate-200">{progress}%</span>
+      <span className="absolute text-2xl font-bold text-slate-200">{progress}%</span>
     </div>
   );
 };
@@ -59,18 +59,18 @@ const CircularProgress: React.FC<{ progress: number, size?: number, strokeWidth?
 
 const RecentMemorizationCard: React.FC<{ studentId: number, student: string, surah: string, progress: number, onSelectStudent: (id: number) => void }> = ({ studentId, student, surah, progress, onSelectStudent }) => {
     return (
-        <div className="p-3 rounded-md hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors duration-200">
+        <div className="p-3 rounded-md hover:bg-dark-border transition-colors duration-200">
             <div className="flex-grow">
                 <div className="flex justify-between items-center mb-2">
-                    <button onClick={() => onSelectStudent(studentId)} className="font-semibold text-slate-800 dark:text-slate-100 hover:text-brand-accent transition-colors duration-200">
+                    <button onClick={() => onSelectStudent(studentId)} className="font-semibold text-slate-100 hover:text-brand-accent transition-colors duration-200">
                       {student}
                     </button>
-                    <span className="text-sm text-slate-500 dark:text-slate-400">{surah}</span>
+                    <span className="text-sm text-slate-400">{surah}</span>
                 </div>
-                <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                <div className="w-full bg-slate-700 rounded-full h-2">
                     <div className="bg-brand-accent h-2 rounded-full" style={{ width: `${progress}%` }}></div>
                 </div>
-                <p className="text-right text-xs mt-1 text-slate-500 dark:text-slate-400">{progress}% Selesai</p>
+                <p className="text-right text-xs mt-1 text-slate-400">{progress}% Selesai</p>
             </div>
         </div>
     );
@@ -78,7 +78,6 @@ const RecentMemorizationCard: React.FC<{ studentId: number, student: string, sur
 
 
 const Dashboard: React.FC<DashboardProps> = ({ onSelectStudent }) => {
-  const { themeMode } = useTheme();
   const [recentMemorizations, setRecentMemorizations] = useState<any[]>([]);
   const [overallProgress, setOverallProgress] = useState(0);
   const [chartData, setChartData] = useState<any[]>([]);
@@ -92,29 +91,29 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectStudent }) => {
     fetchData();
   }, []);
 
-  const gridColor = themeMode === 'light' ? '#e2e8f0' : '#334155';
-  const axisColor = themeMode === 'light' ? '#64748b' : '#94a3b8';
+  const gridColor = '#3A3B3D';
+  const axisColor = '#94a3b8';
   const tooltipStyle = {
-      backgroundColor: themeMode === 'light' ? '#ffffff' : '#1e293b',
+      backgroundColor: '#242526',
       border: `1px solid ${gridColor}`,
       borderRadius: '0.75rem',
       boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'
   };
-  const tooltipLabelStyle = { color: themeMode === 'light' ? '#334155' : '#e2e8f0' };
+  const tooltipLabelStyle = { color: '#e2e8f0' };
 
   return (
     <>
       <div className="space-y-8">
         <div className="flex justify-between items-start sm:items-center">
-            <div className="border-b border-border dark:border-dark-border pb-5 flex-grow">
-              <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-50">Dashboard</h2>
-              <p className="text-slate-500 dark:text-slate-400 mt-1">Selamat datang kembali, Ustadz!</p>
+            <div className="border-b border-dark-border pb-5 flex-grow">
+              <h2 className="text-3xl font-bold text-slate-50">Dashboard</h2>
+              <p className="text-slate-400 mt-1">Selamat datang kembali, Ustadz!</p>
             </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-2">
-            <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4">Statistik Perkembangan Rata-rata Siswa</h3>
+            <h3 className="text-xl font-semibold text-slate-100 mb-4">Statistik Perkembangan Rata-rata Siswa</h3>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
@@ -127,25 +126,25 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectStudent }) => {
                   />
                   <Legend />
                   <Line type="monotone" dataKey="tartiliScore" name="Rata-rata Tartili" stroke="hsl(var(--color-accent-h) var(--color-accent-s) var(--color-accent-l))" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 7 }} connectNulls />
-                  <Line type="monotone" dataKey="hafalanScore" name="Rata-rata Hafalan" stroke="#8884d8" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 7 }} connectNulls />
-                  <Line type="monotone" dataKey="murojaahScore" name="Rata-rata Murojaah" stroke="#4ade80" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 7 }} connectNulls />
+                  <Line type="monotone" dataKey="hafalanScore" name="Rata-rata Hafalan" stroke="#00E0FF" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 7 }} connectNulls />
+                  <Line type="monotone" dataKey="murojaahScore" name="Rata-rata Murojaah" stroke="#FF4FB8" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 7 }} connectNulls />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           </Card>
 
           <Card className="flex flex-col items-center justify-center">
-              <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4">Progress Target Hafalan</h3>
+              <h3 className="text-xl font-semibold text-slate-100 mb-4">Progress Target Hafalan</h3>
               <CircularProgress progress={overallProgress} />
           </Card>
         </div>
 
         <Card>
-          <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">Hafalan Terbaru</h3>
+          <h3 className="text-xl font-semibold text-slate-100 mb-2">Hafalan Terbaru</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
               {recentMemorizations.length > 0 ? recentMemorizations.map((item, index) => (
                   <RecentMemorizationCard key={index} {...item} onSelectStudent={onSelectStudent} />
-              )) : <p className="text-slate-500 dark:text-slate-400 col-span-full text-center py-4">Belum ada data hafalan terbaru.</p>}
+              )) : <p className="text-slate-400 col-span-full text-center py-4">Belum ada data hafalan terbaru.</p>}
           </div>
         </Card>
       </div>
