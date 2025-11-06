@@ -1,8 +1,8 @@
 
-
 import React, { useState, useEffect } from 'react';
-import { Page } from './types';
+import { Page, TeacherProfile } from './types';
 import Sidebar from './components/Sidebar';
+import Header from './components/Header';
 import Dashboard from './components/Dashboard';
 import ProfilPage from './components/ProfilPage';
 import StudentProfile from './components/StudentProfile';
@@ -17,7 +17,8 @@ import ThemeSwitcher from './components/ThemeSwitcher';
 import JadwalPelajaranPage from './components/JadwalPelajaranPage';
 import CatatanHarianPage from './components/DailyNotesPage';
 import PengingatPage from './components/RemindersPage';
-import { getReminders } from './data/dataService';
+import { getReminders, getTeacherProfile } from './data/dataService';
+import LogoutConfirmationModal from './components/LogoutConfirmationModal';
 
 type UserType = 'teacher' | 'student';
 
@@ -27,6 +28,8 @@ const App: React.FC = () => {
   const [activePage, setActivePage] = useState<Page>(Page.Dashboard);
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
   const [remindersCount, setRemindersCount] = useState(0);
+  const [teacherProfile, setTeacherProfile] = useState<TeacherProfile | null>(null);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   const fetchRemindersCount = async () => {
     const reminders = await getReminders();
@@ -34,8 +37,14 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchRemindersCount();
-  }, []);
+    const fetchTeacherData = async () => {
+        if (userType === 'teacher') {
+            await fetchRemindersCount();
+            setTeacherProfile(await getTeacherProfile());
+        }
+    };
+    fetchTeacherData();
+  }, [userType]);
 
   const handleStudentLogin = (studentId: number) => {
     setUserType('student');
@@ -47,6 +56,7 @@ const App: React.FC = () => {
     setLoggedInStudentId(null);
     setSelectedStudentId(null);
     setActivePage(Page.Dashboard);
+    setIsLogoutModalOpen(false);
   };
   
   const handleSelectStudent = (id: number) => {
@@ -120,18 +130,32 @@ const App: React.FC = () => {
   
   if (userType === 'teacher') {
     return (
-        <div className="min-h-screen flex flex-col md:flex-row font-sans">
-            <Sidebar 
-            activePage={activePage} 
-            setActivePage={setActivePage} 
-            onLogout={handleLogout}
-            remindersCount={remindersCount}
+        <>
+            <div className="min-h-screen flex font-sans">
+                <Sidebar 
+                activePage={activePage} 
+                setActivePage={setActivePage} 
+                remindersCount={remindersCount}
+                />
+                <div className="flex-1 flex flex-col h-screen overflow-y-hidden">
+                    <Header
+                        activePage={activePage}
+                        teacherProfile={teacherProfile}
+                        onLogoutClick={() => setIsLogoutModalOpen(true)}
+                        onSettingsClick={() => setActivePage(Page.Pengaturan)}
+                    />
+                    <main className="flex-1 p-4 md:p-8 overflow-y-auto bg-background dark:bg-dark-background">
+                        {renderTeacherContent()}
+                    </main>
+                </div>
+                <ThemeSwitcher />
+            </div>
+            <LogoutConfirmationModal
+                isOpen={isLogoutModalOpen}
+                onClose={() => setIsLogoutModalOpen(false)}
+                onConfirm={handleLogout}
             />
-            <main className="flex-1 p-4 md:p-8 overflow-y-auto">
-            {renderTeacherContent()}
-            </main>
-            <ThemeSwitcher />
-        </div>
+        </>
     );
   }
 

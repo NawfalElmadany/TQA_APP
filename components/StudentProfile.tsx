@@ -1,6 +1,7 @@
 
 
 
+
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { getStudentProfileById, updateStudentProfile } from '../data/dataService';
@@ -230,9 +231,9 @@ const StudentProfile: React.FC<StudentProfileProps> = ({ studentId, onBack }) =>
                                 labelStyle={tooltipLabelStyle}
                             />
                             <Legend />
-                            <Line type="monotone" dataKey="tartiliScore" name="Tartili" stroke="#82ca9d" strokeWidth={3} dot={{ r: 5 }} activeDot={{ r: 8 }} connectNulls />
+                            <Line type="monotone" dataKey="tartiliScore" name="Tartili" stroke="hsl(var(--color-accent-h) var(--color-accent-s) var(--color-accent-l))" strokeWidth={3} dot={{ r: 5 }} activeDot={{ r: 8 }} connectNulls />
                             <Line type="monotone" dataKey="hafalanScore" name="Hafalan" stroke="#8884d8" strokeWidth={3} dot={{ r: 5 }} activeDot={{ r: 8 }} connectNulls />
-                            <Line type="monotone" dataKey="murojaahScore" name="Murojaah" stroke="#ffc658" strokeWidth={3} dot={{ r: 5 }} activeDot={{ r: 8 }} connectNulls />
+                            <Line type="monotone" dataKey="murojaahScore" name="Murojaah" stroke="#f472b6" strokeWidth={3} dot={{ r: 5 }} activeDot={{ r: 8 }} connectNulls />
                         </LineChart>
                     </ResponsiveContainer>
                 </div>

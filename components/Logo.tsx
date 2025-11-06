@@ -17,7 +17,7 @@ const Logo: React.FC<LogoProps> = ({ className = 'w-10 h-10' }) => {
     <>
       <style>{`
         .logo-monitor-body { fill: url(#monitorGradient); }
-        .logo-stand { fill: #336699; }
+        .logo-stand { fill: #3730a3; }
         .logo-screen { fill: white; }
         .logo-person { fill: #4A4A4A; }
 
@@ -32,8 +32,8 @@ const Logo: React.FC<LogoProps> = ({ className = 'w-10 h-10' }) => {
       >
         <defs>
           <linearGradient id="monitorGradient" x1="0.5" y1="0" x2="0.5" y2="1">
-            <stop offset="0%" stopColor="#80D0FF" />
-            <stop offset="100%" stopColor="#4A90E2" />
+            <stop offset="0%" stopColor="#a5b4fc" />
+            <stop offset="100%" stopColor="#6366f1" />
           </linearGradient>
         </defs>
 

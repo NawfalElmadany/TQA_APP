@@ -1,6 +1,3 @@
-
-
-
 import React, { useState, useEffect } from 'react';
 import { Button, Select, FormGroup } from './FormCard';
 import Icon from './Icon';
@@ -47,11 +44,11 @@ const StudentLoginPage: React.FC<StudentLoginPageProps> = ({ onLogin, onBack }) 
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 font-sans">
+    <div className="min-h-screen flex items-center justify-center p-4 font-sans text-white">
       <div className="w-full max-w-md animate-fade-in relative">
          <button
             onClick={onBack}
-            className="absolute -top-16 left-0 md:top-4 md:left-4 bg-card dark:bg-dark-card border border-border dark:border-dark-border text-slate-600 dark:text-slate-300 p-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/60 hover:text-slate-800 dark:hover:text-white transition-colors duration-200"
+            className="absolute -top-16 left-0 md:top-4 md:left-4 bg-dark-card/50 backdrop-blur-xl border border-brand-accent/20 text-slate-300 p-2.5 rounded-lg hover:bg-dark-card/80 hover:border-brand-accent/40 hover:text-white transition-colors duration-200"
             aria-label="Kembali"
         >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -61,15 +58,16 @@ const StudentLoginPage: React.FC<StudentLoginPageProps> = ({ onLogin, onBack }) 
 
         <div className="text-center mb-8">
             <Logo className="w-18 h-18 sm:w-24 sm:h-24 md:w-32 md:h-32 mx-auto mb-6 transition-transform duration-500 ease-in-out hover:scale-110 hover:rotate-3" />
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Login Siswa</h1>
-            <p className="text-slate-600 dark:text-gray-300 mt-1 font-medium">Lihat Progres Hafalanmu</p>
+            <h1 className="text-3xl font-bold text-slate-50 tracking-tight" style={{ textShadow: '0 0 10px hsl(var(--color-accent-h) var(--color-accent-s) var(--color-accent-l) / 0.5)'}}>Login Siswa</h1>
+            <p className="text-slate-300 mt-1 font-medium">Lihat Progres Hafalanmu</p>
         </div>
 
-        <div className="bg-card dark:bg-dark-card border border-border dark:border-dark-border rounded-xl p-8 shadow-lg">
+        <div className="bg-dark-card/50 backdrop-blur-2xl border border-brand-accent/20 rounded-xl p-8 shadow-2xl shadow-brand-accent/10">
           <form onSubmit={handleSubmit} noValidate>
             <div className="space-y-6">
                 <FormGroup label="Pilih Kelas Kamu">
-                    <Select value={selectedClass} onChange={handleClassChange} required>
+                    <Select value={selectedClass} onChange={handleClassChange} required 
+                        className="bg-black/20 border-brand-accent/30 text-white placeholder:text-slate-500 focus:border-brand-accent focus:ring-brand-accent/50">
                         <option value="">Pilih Kelas</option>
                         {classes.map(cls => (
                             <option key={cls} value={cls}>{cls}</option>
@@ -78,7 +76,8 @@ const StudentLoginPage: React.FC<StudentLoginPageProps> = ({ onLogin, onBack }) 
                 </FormGroup>
                 
                 <FormGroup label="Pilih Nama Kamu">
-                    <Select value={selectedStudentId} onChange={(e) => setSelectedStudentId(e.target.value)} required disabled={!selectedClass}>
+                    <Select value={selectedStudentId} onChange={(e) => setSelectedStudentId(e.target.value)} required disabled={!selectedClass}
+                        className="bg-black/20 border-brand-accent/30 text-white placeholder:text-slate-500 focus:border-brand-accent focus:ring-brand-accent/50">
                         <option value="">{selectedClass ? "Pilih Namamu" : "Pilih kelas dulu ya"}</option>
                         {students.map(student => (
                             <option key={student.id} value={student.id}>{student.name}</option>
@@ -91,6 +90,7 @@ const StudentLoginPage: React.FC<StudentLoginPageProps> = ({ onLogin, onBack }) 
                 <Button 
                     type="submit" 
                     disabled={!selectedStudentId}
+                    className="shadow-glow-accent"
                 >
                     MASUK
                 </Button>

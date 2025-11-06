@@ -1,20 +1,18 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Page } from '../types';
 import Icon from './Icon';
 import Logo from './Logo';
-import LogoutConfirmationModal from './LogoutConfirmationModal';
 
 interface SidebarProps {
   activePage: Page;
   setActivePage: (page: Page) => void;
-  onLogout: () => void;
   remindersCount: number;
 }
 
 const NavItem: React.FC<{
   page: Page;
-  iconName: 'dashboard' | 'target' | 'input' | 'laporan' | 'profil' | 'settings' | 'schedule' | 'notes' | 'bookmark';
+  iconName: 'dashboard' | 'target' | 'input' | 'laporan' | 'profil' | 'schedule' | 'notes' | 'bookmark';
   activePage: Page;
   onClick: () => void;
   badgeCount?: number;
@@ -41,14 +39,7 @@ const NavItem: React.FC<{
   );
 };
 
-const Sidebar: React.FC<SidebarProps> = ({ activePage, setActivePage, onLogout, remindersCount }) => {
-  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-
-  const handleLogoutConfirm = () => {
-    onLogout();
-    setIsLogoutModalOpen(false);
-  };
-  
+const Sidebar: React.FC<SidebarProps> = ({ activePage, setActivePage, remindersCount }) => {
   return (
     <>
       <aside className="w-full md:w-64 bg-white dark:bg-dark-card border-r border-border dark:border-dark-border p-4 md:p-6 flex-shrink-0 flex flex-col justify-between">
@@ -67,27 +58,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, setActivePage, onLogout, 
               <NavItem page={Page.Profil} iconName="profil" activePage={activePage} onClick={() => setActivePage(Page.Profil)} />
               <NavItem page={Page.CatatanHarian} iconName="notes" activePage={activePage} onClick={() => setActivePage(Page.CatatanHarian)} />
               <NavItem page={Page.Pengingat} iconName="bookmark" activePage={activePage} onClick={() => setActivePage(Page.Pengingat)} badgeCount={remindersCount} />
-              <NavItem page={Page.Pengaturan} iconName="settings" activePage={activePage} onClick={() => setActivePage(Page.Pengaturan)} />
             </ul>
           </nav>
         </div>
-        
-        <div>
-          <button
-            onClick={() => setIsLogoutModalOpen(true)}
-            className="flex items-center space-x-4 p-3 rounded-lg cursor-pointer transition-all duration-200 ease-in-out w-full text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10"
-            aria-label="Logout"
-          >
-            <Icon name="logout" className="w-6 h-6" />
-            <span className="font-medium">Logout</span>
-          </button>
-        </div>
       </aside>
-      <LogoutConfirmationModal
-        isOpen={isLogoutModalOpen}
-        onClose={() => setIsLogoutModalOpen(false)}
-        onConfirm={handleLogoutConfirm}
-      />
     </>
   );
 };

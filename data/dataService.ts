@@ -1,5 +1,5 @@
 
-import { Student, StudentProfileData, TartiliRecord, HafalanRecord, JuzTarget, SurahTarget, HafalanStatus, MurojaahRecord, ReportStudentData, WeeklySchedule, ScheduleEntry, DailyNote, Reminder } from '../types';
+import { Student, StudentProfileData, TartiliRecord, HafalanRecord, JuzTarget, SurahTarget, HafalanStatus, MurojaahRecord, ReportStudentData, WeeklySchedule, ScheduleEntry, DailyNote, Reminder, TeacherProfile } from '../types';
 import { JUZ_29_SURAHS, JUZ_30_SURAHS, TARTILI_LEVELS } from '../constants';
 
 // --- MOCK DATABASE ---
@@ -75,6 +75,8 @@ function createInitialMockData() {
     const users = [
         { id: 1, name: 'Ustadz', email: 'teacher@example.com', password: 'password123' },
     ];
+    
+    const teacher_profile = { id: 'teacher1', name: 'Ustadz Ahmad', email: 'teacher@example.com', profilePic: null };
 
     return {
         students,
@@ -86,6 +88,7 @@ function createInitialMockData() {
         daily_notes: [],
         reminders: [],
         users,
+        teacher_profile,
     };
 }
 
@@ -229,6 +232,19 @@ export const registerUser = async (email: string, password: string): Promise<{ s
     };
     mockData.users.push(newUser);
     return Promise.resolve({ success: true });
+};
+
+export const getTeacherProfile = async (): Promise<TeacherProfile> => {
+    return Promise.resolve(mockData.teacher_profile);
+};
+
+export const updateTeacherProfile = async (id: string, updatedData: Partial<TeacherProfile>) => {
+    if (mockData.teacher_profile.id === id) {
+        if(updatedData.name) mockData.teacher_profile.name = updatedData.name;
+        if(updatedData.email) mockData.teacher_profile.email = updatedData.email;
+        if(updatedData.profilePic !== undefined) mockData.teacher_profile.profilePic = updatedData.profilePic;
+    }
+    return Promise.resolve();
 };
 
 // --- DATA INPUT & HISTORY ---

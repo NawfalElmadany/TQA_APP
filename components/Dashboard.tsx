@@ -128,7 +128,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onSelectStudent }) => {
                   <Legend />
                   <Line type="monotone" dataKey="tartiliScore" name="Rata-rata Tartili" stroke="hsl(var(--color-accent-h) var(--color-accent-s) var(--color-accent-l))" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 7 }} connectNulls />
                   <Line type="monotone" dataKey="hafalanScore" name="Rata-rata Hafalan" stroke="#8884d8" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 7 }} connectNulls />
-                  <Line type="monotone" dataKey="murojaahScore" name="Rata-rata Murojaah" stroke="#82ca9d" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 7 }} connectNulls />
+                  <Line type="monotone" dataKey="murojaahScore" name="Rata-rata Murojaah" stroke="#4ade80" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 7 }} connectNulls />
                 </LineChart>
               </ResponsiveContainer>
             </div>
